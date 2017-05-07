@@ -13,7 +13,7 @@ my_ads = api.get_my_ads()
 
 ## Documentation
 No ebk-client doc available yet.  
-The official documentation of the eBay Kleinanzeigen/Classifieds API is described [here](http://api.ebay-kleinanzeigen.de/docs/pages/home)
+The official documentation of the eBay Kleinanzeigen/Classifieds API is described [here](https://api.ebay-kleinanzeigen.de/docs/pages/home)
 
 ## Requirements
  * Python 2
