@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 ebk-client - eBay Kleinanzeigen/Classifieds API client in Python
@@ -25,26 +24,14 @@ OR OTHER DEALINGS IN THE SOFTWARE.
 Author: tjado <https://github.com/tejado>
 """
 
-import json
 import base64
 import hashlib
-import dateutil.parser
-import requests
+import requests.packages.urllib3
 
-from datetime import datetime
-from dateutil.tz import tzlocal
+requests.packages.urllib3.disable_warnings()
 
-try:
-    from html import unescape  # python 3.4+
-except ImportError:
-    try:
-        from html.parser import HTMLParser  # python 3.x (<3.4)
-    except ImportError:
-        from HTMLParser import HTMLParser  # python 2.x
-    unescape = HTMLParser().unescape
 
 class EbkClient:
-
     H_EBAYK_CLIENT_APP = '13a6dde3-935d-4cd8-9992-db8a8c4b6c0f1456515662228'
     H_EBAYK_CLIENT_VERSION = '5423'
     H_EBAYK_CLIENT_TYPE = 'ebayk-android-app-6.9.3'
@@ -55,18 +42,11 @@ class EbkClient:
     username = None
 
     def __init__(self, app_username, app_password, user_username, user_password):
-
-        try:
-            import requests.packages.urllib3
-            requests.packages.urllib3.disable_warnings()
-        except:
-            pass
-
         self.username = user_username
-        app_auth = base64.b64encode('{}:{}'.format(app_username, app_password).encode('ascii')).decode("utf-8")
-        
+        app_auth = base64.b64encode(f'{app_username}:{app_password}'.encode('ascii')).decode("utf-8")
+
         hashed_user_password = base64.b64encode(hashlib.sha1(user_password.encode('ascii')).digest()).decode("utf-8")
-        user_auth = 'email="{}",password="{}"'.format(user_username, hashed_user_password)
+        user_auth = f'email="{user_username}",password="{hashed_user_password}"'
 
         header = {
             'X-EBAYK-APP': self.H_EBAYK_CLIENT_APP,
@@ -75,49 +55,66 @@ class EbkClient:
             'Authorization': 'Basic {}'.format(app_auth),
             'X-ECG-Authorization-User': user_auth,
             'User-Agent': self.H_EBAYK_CLIENT_UA,
-            }
+        }
 
         self._session = requests.session()
         self._session.headers.update(header)
 
     def _validate_http_response(self, r):
+        if r.status_code < 400:
+            return
+
+        print("Error response body:\n" + r.content.decode('utf-8'))
+
         if r.status_code == 401:
-            raise Exception('Access Denied (e.g. wrong app credentials or user credentials)')
+            raise AttributeError(f'Access Denied {r.status_code}')
         elif r.status_code == 404:
-            raise Exception('Not found')
-        elif r.status_code == 500:
-            raise Exception('Internal Server Error (e.g. wrong request)')
+            raise FileNotFoundError(f'Not found {r.status_code}')
+        elif r.status_code >= 500:
+            raise SystemError(f'Server Error {r.status_code}')
+
+        raise AttributeError(f'Client error {r.status_code}')
 
     def _http_get(self, url_suffix):
-        response = self._session.get( self.URL_PREFIX + url_suffix )
+        response = self._session.get(self.URL_PREFIX + url_suffix)
         self._validate_http_response(response)
         return response
 
-    def _http_post(self, url_suffix, post_data = ''):
-        response = self._session.post( self.URL_PREFIX + url_suffix, data=post_data, headers={'Content-Type': 'application/xml'} )
-        print(response.content)
+    def _http_post(self, url_suffix, post_data='', **kwargs):
+        response = self._session.post(self.URL_PREFIX + url_suffix, data=post_data,
+                                      headers={'Content-Type': 'application/xml'},
+                                      **kwargs)
         self._validate_http_response(response)
         return response
 
-    def _http_put(self, url_suffix, post_data = ''):
-        response = self._session.put( self.URL_PREFIX + url_suffix, data=post_data, headers={'Content-Type': 'application/xml'} )
+    def _http_post_files(self, url_suffix, files):
+        response = self._session.post(self.URL_PREFIX + url_suffix, files=files)
+        self._validate_http_response(response)
+        return response
+
+    def _http_put(self, url_suffix, post_data=''):
+        response = self._session.put(self.URL_PREFIX + url_suffix, data=post_data,
+                                     headers={'Content-Type': 'application/xml'})
         self._validate_http_response(response)
         return response
 
     def _http_delete(self, url_suffix):
-        response = self._session.delete( self.URL_PREFIX + url_suffix )
+        response = self._session.delete(self.URL_PREFIX + url_suffix)
         self._validate_http_response(response)
         return response
 
-    def get_my_ads(self):
-        url = "/users/{}/ads.json?_in=id,title,start-date-time,ad-status".format(self.username)
-        response = self._http_get(url)
-        response_json = json.loads(response.content.decode('utf-8'))
-        my_ads = response_json.get('{http://www.ebayclassifiedsgroup.com/schema/ad/v1}ads', {}).get('value', {}).get('ad', None)
+    def __http_get_body(self, url):
+        return self._http_get(url).content.decode('utf-8')
 
-        return my_ads
+    def __get_json_content(self, response):
+        data = response.json()
+        schema_key = [k for k in data.keys() if k.startswith('{http')][0]
+        return data[schema_key]['value']
 
-    def change_ad_status(self, ad_id, status):
+    def __http_get_json_content(self, url):
+        return self.__get_json_content(self._http_get(url))
+
+    def __change_ad_status(self, ad_id, status):
         if status not in ['active', 'paused']:
             raise Exception('Wrong ad status')
 
@@ -129,14 +126,26 @@ class EbkClient:
         else:
             return False
 
+    def get_my_ads(self):
+        url = f'/users/{self.username}/ads.json?_in=id,title,start-date-time,ad-status'
+        return self.__http_get_json_content(url).get('ad', None)
+
+    def get_ad(self, id):
+        url = f'/ads/{id}.json'
+        return self.__http_get_json_content(url)
+
+    def get_ad_xml(self, id):
+        url = f'/ads/{id}'
+        return self.__http_get_body(url)
+
     def activate_ad(self, ad_id):
-        return change_ad_status(ad_id, 'active')
+        return self.__change_ad_status(ad_id, 'active')
 
     def deactivate_ad(self, ad_id):
-        return change_ad_status(ad_id, 'paused')
+        return self.__change_ad_status(ad_id, 'paused')
 
     def delete_ad(self, ad_id):
-        url = "/users/{}/ads/{}".format(self.username, ad_id)
+        url = f'/users/{self.username}/ads/{ad_id}'
         response = self._http_delete(url)
 
         if response.status_code == 204:
@@ -145,61 +154,41 @@ class EbkClient:
             return False
 
     def create_ad(self, xml):
-        url = "/users/{}/ads.json".format(self.username)
-        response = self._http_post(url, xml)
-        return response
-        
-    def get_categories(self, cat_id = None):
+        url = f'/users/{self.username}/ads.json'
+        return self._http_post(url, xml.encode('utf-8'))
+
+    def get_categories(self, cat_id=None):
         if cat_id is not None:
-            url = "/categories/{}.json".format(cat_id)
-            schema_uri = '{http://www.ebayclassifiedsgroup.com/schema/category/v1}category'
+            url = f'/categories/{cat_id}.json'
         else:
-            url = "/categories.json"
-            schema_uri = '{http://www.ebayclassifiedsgroup.com/schema/category/v1}categories'
+            url = '/categories.json'
+        return self.__http_get_json_content(url).get('category', None)
 
-        response = self._http_get(url)
-        response_json = json.loads(response.content.decode('utf-8'))
-        categories = response_json.get(schema_uri, {}).get('value', {}).get('category', None)
+    def get_category_attributes(self, cat_id=None):
+        url = f'/attributes/metadata/{cat_id}.json'
+        return self.__http_get_json_content(url).get('attribute', None)
 
-        return categories
+    def get_category_metadata(self, cat_id=None):
+        url = f'/ads/metadata/{cat_id}.json'
+        return self.__http_get_json_content(url)
 
-    def get_category_attributes(self, cat_id = None):
-
-        url = "/attributes/metadata/{}.json".format(cat_id)
-        schema_uri = '{http://www.ebayclassifiedsgroup.com/schema/attribute/v1}attributes'
-
-        response = self._http_get(url)
-        response_json = json.loads(response.content.decode('utf-8'))
-        cat_attr = response_json.get(schema_uri, {}).get('value', {}).get('attribute', None)
-
-        return cat_attr
-
-    def get_locations(self, url_suffix, depth = None, include_parent_path = False):
-        url = "/locations.json?{}".format(url_suffix)
+    def get_locations(self, url_suffix, depth=None, include_parent_path=False):
+        url = f'/locations.json?{url_suffix}'
         if depth is not None:
-            url += '&depth={}'.format(depth)
+            url += f'&depth={depth}'
 
         if include_parent_path is True:
             url += '&includeParentPath=true'
 
-        schema_uri = '{http://www.ebayclassifiedsgroup.com/schema/location/v1}locations'
+        return self.__http_get_json_content(url).get('location', None)
 
-        response = self._http_get(url)
-        response_json = json.loads(response.content.decode('utf-8'))
-        categories = response_json.get(schema_uri, {}).get('value', {}).get('location', None)
+    def get_location_by_name(self, location_name, depth=None, include_parent_path=False):
+        url_suffix = f'q={location_name}'
+        return self.get_locations(url_suffix, depth, include_parent_path)
 
-        return categories
+    def get_location_by_coordinates(self, latitude, longitude, depth=None, include_parent_path=False):
+        url_suffix = f'latitude={latitude}&longitude={longitude}'
+        return self.get_locations(url_suffix, depth, include_parent_path)
 
-    def get_location_by_name(self, location_name, depth = None, include_parent_path = False):
-        url_suffix = "q={}".format(location_name)
-        locations = self.get_locations(url_suffix, depth, include_parent_path)
-        return locations
-
-    def get_location_by_coordinates(self, latitude, longitude, depth = None, include_parent_path = False):
-        url_suffix = "latitude={}&longitude={}".format(latitude,longitude)
-        locations = self.get_locations(url_suffix, depth, include_parent_path)
-        return locations
-
-    def html_unescape(self, data):
-        return unescape(data)
-
+    def upload_picture(self, filename, data):
+        return self.__get_json_content(self._http_post_files('/pictures.json', {'file': (filename, data)}))

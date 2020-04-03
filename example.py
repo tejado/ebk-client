@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 ebk-client - eBay Kleinanzeigen/Classifieds API client in Python
@@ -24,8 +24,8 @@ OR OTHER DEALINGS IN THE SOFTWARE.
 
 Author: tjado <https://github.com/tejado>
 """
-
 import pprint
+import html
 import dateutil.parser
 from datetime import datetime
 from dateutil.tz import tzlocal
@@ -43,9 +43,9 @@ for ad in my_ads:
     d = dateutil.parser.parse(creation)
     age_in_h = (now - d).total_seconds() / 3600
 
-    title = ad.get('title', {}).get('value', '').encode('utf-8')
-    title_unescaped = api.html_unescape(title)
-    print( "{} ({}) -> {}... ".format(id, age_in_h, title_unescaped) )
+    title = ad.get('title', {}).get('value', '')
+    title_unescaped = html.unescape(title)
+    print("{} ({}) -> {}... ".format(id, age_in_h, title_unescaped))
 
 # categories = api.get_categories(80)
 # print('Subcategories of cat 80:\n\r{}'.format(pprint.PrettyPrinter(indent=4).pformat(categories)))
