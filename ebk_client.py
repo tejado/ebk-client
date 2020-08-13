@@ -45,8 +45,10 @@ class EbkClient:
         self.username = user_username
         app_auth = base64.b64encode(f'{app_username}:{app_password}'.encode('ascii')).decode("utf-8")
 
+        print('Basic {}'.format(app_auth))
         hashed_user_password = base64.b64encode(hashlib.sha1(user_password.encode('ascii')).digest()).decode("utf-8")
         user_auth = f'email="{user_username}",password="{hashed_user_password}"'
+        print('{}'.format(user_auth))
 
         header = {
             'X-EBAYK-APP': self.H_EBAYK_CLIENT_APP,
@@ -80,9 +82,22 @@ class EbkClient:
         self._validate_http_response(response)
         return response
 
+    def _http_get2(self, url_suffix):
+        response = self._session.get(self.URL_PREFIX + url_suffix)
+        #self._validate_http_response(response)
+        return response
+
     def _http_post(self, url_suffix, post_data='', **kwargs):
         response = self._session.post(self.URL_PREFIX + url_suffix, data=post_data,
                                       headers={'Content-Type': 'application/xml'},
+                                      **kwargs)
+        self._validate_http_response(response)
+        return response
+
+    def _http_post_convo(self, url_suffix, post_data='', **kwargs):
+        response = self._session.post(self.URL_PREFIX + url_suffix, data=post_data,
+                                      headers={'Content-Type': 'application/json; charset=utf-8',
+                                               'Content-Disposition': 'form-data; name="message"'},
                                       **kwargs)
         self._validate_http_response(response)
         return response
@@ -111,6 +126,14 @@ class EbkClient:
         schema_key = [k for k in data.keys() if k.startswith('{http')][0]
         return data[schema_key]['value']
 
+    def __get_json_content_convos(self, response):
+        data = response.json()
+        return data['conversations']
+
+    def __get_json_content_convo(self, response):
+        data = response.json()
+        return data['messages']
+
     def __http_get_json_content(self, url):
         return self.__get_json_content(self._http_get(url))
 
@@ -130,9 +153,21 @@ class EbkClient:
         url = f'/users/{self.username}/ads.json?_in=id,title,start-date-time,ad-status'
         return self.__http_get_json_content(url).get('ad', None)
 
+    def get_my_convos(self):
+        url = f'/users/{self.username}/conversations?size=100'
+        return self.__get_json_content_convos(self._http_get(url))
+
+    def get_convo(self, id):
+        url = f'/users/{self.username}/conversations/{id}'
+        return self.__get_json_content_convo(self._http_put(url))
+
     def get_ad(self, id):
         url = f'/ads/{id}.json'
-        return self.__http_get_json_content(url)
+        #return self.__http_get_json_content(url)
+        response = self._http_get2(url)
+
+        if response.status_code < 400:
+            return self.__get_json_content(response)
 
     def get_ad_xml(self, id):
         url = f'/ads/{id}'
@@ -156,6 +191,11 @@ class EbkClient:
     def create_ad(self, xml):
         url = f'/users/{self.username}/ads.json'
         return self._http_post(url, xml.encode('utf-8'))
+
+    def reply_to_conversation(self, conversation, message):
+        url = f'/users/{self.username}/conversations/{conversation}'
+        content = '{"message":"' + message + '"}'
+        return self._http_post_convo(url, content.encode('utf-8'))
 
     def get_categories(self, cat_id=None):
         if cat_id is not None:
