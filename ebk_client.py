@@ -155,15 +155,26 @@ class EbkClient:
 
     def get_my_convos(self):
         url = f'/users/{self.username}/conversations?size=100'
-        return self.__get_json_content_convos(self._http_get(url))
+        return self.__get_json_content_convos(self._http_get(url)) #just loop through the return list and get adId or unreadMessagesCount or textShortTrimmed for example
 
     def get_convo(self, id):
         url = f'/users/{self.username}/conversations/{id}'
-        return self.__get_json_content_convo(self._http_put(url))
+        return self.__get_json_content_convo(self._http_put(url)) #http_put to mark the conversation as read
 
     def get_ad(self, id):
         url = f'/ads/{id}.json'
         #return self.__http_get_json_content(url)
+        #i changed that for my code to work,
+        # i loop through conversations and get the ad,
+        # but if the ad would not exist anymore my prog would have thrown a Exception
+        # now i just check the return of this if its None
+        #example:
+        #my_convos = api.get_my_convos()
+        #for convo in my_convos:
+        #   id = convo.get('adId', 0)
+        #   ad = api.get_ad(id)
+        #   if ad is not None:
+        #       title = ad.get('title', {}).get('value', '')
         response = self._http_get2(url)
 
         if response.status_code < 400:
