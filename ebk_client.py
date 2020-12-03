@@ -106,13 +106,19 @@ class EbkClient:
     def __http_get_body(self, url):
         return self._http_get(url).content.decode('utf-8')
 
-    def __get_json_content(self, response):
+    def __get_json_content(self, response, api_v2: bool = False):
         data = response.json()
-        schema_key = [k for k in data.keys() if k.startswith('{http')][0]
-        return data[schema_key]['value']
+
+        if not api_v2:
+            schema_key = [k for k in data.keys() if k.startswith('{http')][0]
+            data = data[schema_key]['value']
+
+        return data
 
     def __http_get_json_content(self, url):
-        return self.__get_json_content(self._http_get(url))
+        api_v2 = url.startswith('/v2/')
+
+        return self.__get_json_content(self._http_get(url), api_v2=api_v2)
 
     def __change_ad_status(self, ad_id, status):
         if status not in ['active', 'paused']:
@@ -192,3 +198,29 @@ class EbkClient:
 
     def upload_picture(self, filename, data):
         return self.__get_json_content(self._http_post_files('/pictures.json', {'file': (filename, data)}))
+
+    def get_view_count(self, id: int):
+        """
+        Retrieves the view count.
+
+        :param id: Ad ID.
+        :type id: int
+        :return: How many impressions this add has.
+        :rtype: int
+        """
+        url = f'/v2/counters/ads/vip/{id}.json'
+
+        return self.__http_get_json_content(url)['value']
+
+    def get_watchlist_count(self, id: int):
+        """
+        Retrieves the watchlist count.
+
+        :param id: Ad ID.
+        :type id: int
+        :return: How many users have put this ad to their watchlist.
+        :rtype: int
+        """
+        url = f'/v2/counters/ads/watchlist?adIds={id}'
+
+        return self.__http_get_json_content(url)['counters'][0]['value']
