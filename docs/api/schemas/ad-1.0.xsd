@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema version="1.0"
+        targetNamespace="http://www.ebayclassifiedsgroup.com/schema/ad/v1"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:types="http://www.ebayclassifiedsgroup.com/schema/types/v1"
+        xmlns:cat="http://www.ebayclassifiedsgroup.com/schema/category/v1"
+        xmlns:loc="http://www.ebayclassifiedsgroup.com/schema/location/v1"
+        xmlns:attr="http://www.ebayclassifiedsgroup.com/schema/attribute/v1"
+        xmlns:ad="http://www.ebayclassifiedsgroup.com/schema/ad/v1"
+        xmlns:pic="http://www.ebayclassifiedsgroup.com/schema/picture/v1"
+        elementFormDefault="qualified">
+
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace"/>
+    <xs:import namespace="http://www.ebayclassifiedsgroup.com/schema/types/v1" schemaLocation="types-1.0.xsd"/>
+    <xs:import namespace="http://www.ebayclassifiedsgroup.com/schema/category/v1" schemaLocation="category-1.0.xsd"/>
+    <xs:import namespace="http://www.ebayclassifiedsgroup.com/schema/location/v1" schemaLocation="location-1.0.xsd"/>
+    <xs:import namespace="http://www.ebayclassifiedsgroup.com/schema/attribute/v1" schemaLocation="attribute-1.0.xsd"/>
+    <xs:import namespace="http://www.ebayclassifiedsgroup.com/schema/picture/v1" schemaLocation="picture-1.0.xsd"/>
+
+    <xs:annotation>
+        <xs:documentation>eBay Classifieds Group Common API Ad Schema Version 1.0</xs:documentation>
+    </xs:annotation>
+
+    <!-- ======================================================== -->
+    <!--   top level or referenced elements                       -->
+    <!-- ======================================================== -->
+
+    <xs:element name="ad" type="ad:Ad"/>
+    <xs:element name="ads" type="ad:Ads"/>
+	<xs:element name="ads-search-options" type="ad:AdsSearchOptions"/>
+
+    <!-- ======================================================== -->
+    <!--   specific types                                         -->
+    <!-- ======================================================== -->
+
+	<xs:complexType name="Ad">
+		<xs:annotation>
+			<xs:documentation>ad base type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<!-- ====================================================== -->
+			<!--   ad basic                                             -->
+			<!-- ====================================================== -->
+			<xs:element name="price" type="types:Price" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>item price</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ad-type" type="ad:AdType" minOccurs="0" />
+			<xs:element name="title" type="types:StringType"
+				minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>free text ad title</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="description" type="types:StringType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>free text ad details</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="imprint" type="types:StringType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>imprint information for commercial posters
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ad-address" type="types:Address" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>ad item location address</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ad-status" type="ad:AdStatus" minOccurs="0" />
+			<xs:element name="email" type="types:StringType" minOccurs="0" />
+			<xs:element name="user-id" type="types:IdType" minOccurs="0" />
+			<xs:element name="ad-guid" type="types:StringType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>globally unique ad identifier (for verification
+						purposes)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<!-- ====================================================== -->
+			<!--   ad source information                                -->
+			<!-- ====================================================== -->
+			<xs:element name="poster-ip-address" type="types:StringType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>source ip address from where ad had been
+						initially posted or updated
+                      </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="poster-machine-id" type="types:StringType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>machine id from where ad had been originated or
+						last updated
+                      </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ad-source-id" type="types:StringType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>identifies original ad provider (web, partner,
+						etc...)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ad-external-reference-id" type="types:StringType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>reference to external ad identifier like ebay
+						item id</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<!-- ====================================================== -->
+			<!--   ad statistics                                        -->
+			<!-- ====================================================== -->
+			<xs:element name="view-ad-count" type="types:LongType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>how many times view ad page had been hit
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="prohibited-flag-count" type="types:LongType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>community flagging - prohibited flag count
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="spam-flag-count" type="types:LongType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>community flagging - spam flag count
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="miscategorized-flag-count" type="types:LongType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>community flagging - miscategorized flag count
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<!-- ====================================================== -->
+			<!--   ad dates                                             -->
+			<!-- ====================================================== -->
+			<xs:element name="creation-date-time" type="types:DateTimeType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>date/time ad was created on target platform
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="modification-date-time" type="types:DateTimeType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>date/time ad was last modified on target platform
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="start-date-time" type="types:DateTimeType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>date/time ad became available on site
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="end-date-time" type="types:DateTimeType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>date/time ad was removed from site
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<!-- ====================================================== -->
+			<!--   ad category, location, attributes, pictures          -->
+			<!-- ====================================================== -->
+			<xs:element ref="cat:category" minOccurs="0"/>
+			<xs:element ref="loc:locations" minOccurs="0"/>
+			<xs:element ref="attr:attributes" minOccurs="0"/>
+			<xs:element name="link" type="types:Link" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>link set for:
+						1) self resource link, used in case of partial data set,
+						2) link to public website
+                      </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="pic:pictures" minOccurs="0"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="types:IdAttribute" use="required" />
+		<xs:attributeGroup ref="types:TopElementAttributeGroup" />
+		<xs:anyAttribute namespace="##any" processContents="skip" />
+	</xs:complexType>
+    
+    <xs:complexType name="Ads">
+        <xs:annotation>
+            <xs:documentation>container element for collection of ad elements</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="ad" type="ad:Ad" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="types:paging"/>
+            <xs:element name="ads-search-options" type="ad:AdsSearchOptions" minOccurs="0"/>
+            <xs:element name="ads-search-histograms" type="ad:AdsSearchHistograms" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attributeGroup ref="types:TopElementAttributeGroup"/>
+    </xs:complexType>
+    
+    <xs:complexType name="AdsSearchOptions">
+        <xs:annotation>
+            <xs:documentation>metadata for search</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="q" type="types:StringType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="adStatus" type="ad:AdStatus" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="adType" type="ad:AdType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="priceType" type="types:PriceType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="priceCurrency" type="types:StringType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="minPrice" type="types:BigDecimalType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="maxPrice" type="types:BigDecimalType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="email" type="types:StringType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="userId" type="types:LongType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="page" type="types:LongType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="size" type="types:LongType" minOccurs="0" maxOccurs="1"/>
+            <!--locationIds StringType because we represent the set of ids comma-separated, e.g. '345,3456'-->
+            <xs:element name="locationId" type="types:StringType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="zipcode" type="types:StringType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="address" type="types:StringType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="distance" type="types:LongType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="distanceUnit" type="types:DistanceUnitType" minOccurs="0" maxOccurs="1"/>
+            <!--categoryIds StringType because we represent the set of ids comma-separated, e.g. '456345,122'-->
+            <xs:element name="categoryId" type="types:StringType" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="attr:attributes" minOccurs="0"/>
+			<xs:element name="extensions" type="ad:Extensions" minOccurs="0"/>
+            <!--exclude info string because we represent the set of ids comma-separated, e.g. '1,2'-->                
+            <xs:element name="excludeExternalSource" type="types:StringType" minOccurs="0" maxOccurs="1"/>
+            <!-- e.g. for reporting search parameter problems which could be recovered from (e.g. by discarding, fallback) -->
+            <xs:element ref="types:api-warnings" minOccurs="0" maxOccurs="1"/> 
+        </xs:sequence>
+        <xs:attributeGroup ref="types:TopElementAttributeGroup"/>
+    </xs:complexType>
+    
+    <xs:complexType name="Extensions">
+        <xs:annotation>
+            <xs:documentation>container element for collection of platform specific search extensions
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:choice>
+                            <xs:element name="value" type="xs:string"/>
+                            <xs:element name="supported-value" type="xs:string" minOccurs="0"
+                                        maxOccurs="unbounded"/>
+                        </xs:choice>
+                        <xs:element name="description" type="xs:string"/>
+                    </xs:sequence>
+                    <xs:attribute name="name" type="xs:string"/>
+                    <xs:attribute name="type" type="types:DataTypeEnum"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="AdStatusEnum">
+        <xs:annotation>
+            <xs:documentation>all possible ad statuses, request _metadata=true to see values supported by underlying
+                platform
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="PENDING"/>
+            <xs:enumeration value="ACTIVE"/>
+            <xs:enumeration value="DELAYED"/>
+            <xs:enumeration value="DELETED"/>
+            <xs:enumeration value="EXPIRED"/>
+            <xs:enumeration value="ARCHIVED"/>
+        </xs:restriction>        
+    </xs:simpleType>
+
+    <xs:complexType name="AdStatus">
+        <xs:annotation>
+            <xs:documentation>current ad status</xs:documentation>
+        </xs:annotation>
+		<xs:choice>
+			<xs:element name="value" type="ad:AdStatusEnum"/>
+			<xs:element name="supported-value" type="types:LocalizedValue" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:choice>
+		<xs:attributeGroup ref="types:MetadataAttributeGroup"/>
+    </xs:complexType>
+
+    <xs:simpleType name="AdTypeEnum">
+        <xs:annotation>
+            <xs:documentation>all possible ad types, request _metadata=true to see values supported by underlying
+                platform
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="OFFERED"/>
+            <xs:enumeration value="WANTED"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+	<!--  http://www.w3schools.com/schema/schema_complex_mixed.asp -->
+    <!--  xs:complexType name="AdType" mixed="true" -->
+
+    <xs:complexType name="AdType">
+        <xs:annotation>
+            <xs:documentation>type of ad</xs:documentation>
+        </xs:annotation>
+		<xs:choice>
+			<xs:element name="value" type="ad:AdTypeEnum"/>
+			<xs:element name="supported-value" type="types:LocalizedValue" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:choice>
+		<xs:attributeGroup ref="types:MetadataAttributeGroup"/>
+    </xs:complexType>
+
+	<!-- ====================================================== -->
+	<!--   ads search results histograms                        -->
+	<!-- ====================================================== -->
+
+    <xs:complexType name="AdsSearchHistograms">
+        <xs:annotation>
+            <xs:documentation>container for all search histograms</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="ads-category-histogram" type="ad:AdsCategoryHistogram" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="AdsCategoryHistogram">
+        <xs:annotation>
+            <xs:documentation>ads search category histogram</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="ads-category" type="types:IdHistogramEntry" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

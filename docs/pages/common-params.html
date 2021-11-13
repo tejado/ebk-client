@@ -1,0 +1,245 @@
+<html>
+<head>
+    <script src="../js/codemirror.js" type="text/javascript"></script>
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<title>ecg common API documentation</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../webapp/css/docs.css"/>
+<style type="text/css">
+    .CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #eee;
+        text-align: right;
+        padding-right: .3em;
+        font-size: 10pt;
+        font-family: monospace;
+        padding-top: .4em;
+    }
+
+    .code {
+        background-color: #EEEEEE;
+    }
+
+</style>
+
+</head>
+
+<body style="padding: 20px;">
+
+
+
+<a href="home.html"><img src="../img/api-logo-middle.png" border="0"/></a><br/>
+eBay-Classifieds API documentation, specification version: 1.6 <br/><br/>
+
+    <!--todo change this to <div> style layout-->
+
+<a href="home.html">Home navigation</a>
+
+<h1>Page common-params</h1>
+
+
+<hr/>
+All requests share common parameters. They can be passed as permalink friendly URL-parameters or by HTTP Request headers.
+The common URL-parameters always start with '_' (e.g. '_in') and HTTP Header 'X-ECG-' (e.g. 'X-ECG-IN'):
+
+
+<table border="1">
+    <tr>
+        <th>URL parameter</th>
+        <th>HTTP Header</th>
+        <th>semantics</th>
+        <th>default-value</th>
+    </tr>
+    <tr>
+        <td>_in</td>
+        <td>X-ECG-IN</td>
+        <td>Limiting response payload (see <a href="#in">details</a>)</td>
+        <td>-</td>
+    </tr>
+    <tr>
+        <td>_ver</td>
+        <td>X-ECG-VER</td>
+        <td>Adressing a representation from a specified release (e.g. some fields could have been added later and should be exclude).</td>
+        <td>The latest released common-api version (e.g. 1.5)</td>
+    </tr>
+    <tr>
+        <td>_callback</td>
+        <td>not-supported (jsonp style does not send specific HTTP Headers)</td>
+        <td>Enabling/Disabling JSONP support (see <a href="#callback">details</a>). Value is the callback name.</td>
+        <td>-</td>
+    </tr>
+    <tr>
+        <td><a name="schemaLocation">_schemaLocation</a></td>
+        <td>X_ECG_SCHEMA_LOCATION</td>
+        <td>Enabling/Disabling inclusion of schema-location information (supported for XML format only)</td>
+        <td>false</td>
+    </tr>
+    <tr>
+        <td><a name="metadata">_metadata</a></td>
+        <td>X-ECG-METADATA</td>
+        <td></td>
+        <td>false</td>
+    </tr>
+    <tr>
+        <td><a name="udid">_udid</a></td>
+        <td>X-ECG-UDID</td>
+        <td>Alternative way of authentication (random id bound to a user).</td>
+        <td>-</td>
+    </tr>
+</table>
+
+
+<h1>Examples</h1>
+<h2><a name="in">Result limiting _in</a></h2>
+A good way to decrease the returned payload is the _in parameter, which limits the result set (comparable
+to the 'SELECT xxx from ...' SQL language). It is comma-separated and supports nested data operator
+<textarea class="xml">
+# only include title from ad
+GET /ads/3?_in=title:
+
+<ad:ad locale="de" version="1.5" id="3">
+    <ad:title>Nice cat</ad:title>
+</ad:ad>
+
+
+# multiple includes with comma separator
+GET /api/ads/3?_in=title,user-id:
+
+<ad:ad ... id="3">
+    <ad:title>Nice cat</ad:title>
+    <ad:user-id>2392557</ad:user-id>
+</ad:ad>
+    
+
+# only include price-info (includes all subelements)
+GET /ads/3?_in=price:
+
+<ad:ad ... id="3">
+    <ad:price>
+        <types:currency-iso-code>
+            <types:value localized-label="EUR">EUR</types:value>
+        </types:currency-iso-code>
+        <types:amount>395.00</types:amount>
+        <types:price-type>
+            <types:value>PLEASE_CONTACT</types:value>
+        </types:price-type>
+    </ad:price>
+</ad:ad>
+
+
+# only include price-info (but further limits subelements, with '.' operator)
+GET /ads/3?_in=price.amount:
+
+<ad:ad ... id="3">
+    <ad:price>
+        <types:amount>395.00</types:amount>
+    </ad:price>
+</ad:ad>
+</textarea>
+
+
+<h3>Performance optimization</h3>
+Use this feature as much as you can, it greatly decreases payload size and therefore has positive impact in response
+time.
+
+<h3>Single vs. collection resource</h3>
+_in parameters always apply to the main resource, e.g. doing following would give you the same filtering back.
+
+<textarea class="xml">
+# SINGLE resource (ad scope)
+GET /ads/3?_in=title:
+
+<ad:ad id="3">
+    <ad:title>Cute black cat</ad:title>
+</ad:ad>
+    
+
+
+# COLLECTION resource (still ad scope just as a collection)
+GET /ads?_in=title:
+
+<ad:ads locale="de" version="1.5">
+    ...
+    <ad:ad id="3">
+        <ad:title>Cute black cat</ad:title>
+    </ad:ad>
+    <ad:ad id="4">
+        <ad:title>Nokia N97 Mini white</ad:title>
+    </ad:ad>
+    <ad:ad id="5">
+        <ad:title>Car COBRA</ad:title>
+    </ad:ad>
+    ...
+<ad:ads>
+
+</textarea>
+
+
+
+<h3>Non-recursive</h3>
+Currently _in is non-recursive. E.g. doing /locations?_in=id-name only applies on the first
+child element and not on the subchildren. So be aware that _in doesn't work well with deeply nested hierachies.
+Never the less this feature is on the list.
+
+
+
+<h2><a name="callback">Callback (jsonp)</a></h2>
+To ease implementation for java-script based clients and supporting <a href="http://en.wikipedia.org/wiki/JSON#JSONP" target="_blank">jsonp</a>.
+The _callback parameter value is the method name you are implementing as callback on Javascript side. The json payload
+is then encapsulated inside a method callback:
+
+<textarea class="xml">
+GET /ads?_callback=callbackMethodName:
+callbackMethodName (
+  {
+    title: { value: "Nice cat"}
+    ....
+  }
+)
+</textarea>
+
+<h3>Security note</h3>
+In case the resource is protected by HTTP digest, problems occur with jsonp because it is browser based and
+authentication credentials mustn't be sent from this side. Further more the
+jsonp style  &lt;script src=""...&gt; doesn't go well with custom HTTP Request Headers (it is a simple link inclusion). Therefore
+<a href="intro.html#contat">contact</a> the platform implementor whether jsonp is supported at all.
+
+<hr/>
+eBay-Classifieds API documentation, specification version: 1.6
+
+<script type="text/javascript">
+
+    // all textareas with class 'xml' should be formatted nicely
+    textareas = $('textarea.xml');
+
+    for (i = 0; i < textareas.length; i++) {
+
+        var lines = textareas[i].value.split("\n").length;
+        // we dynamically calculate the textbox area height to avoid uneccessary frontend configuration 
+        var textboxHeight = lines * 18 + "px";
+
+        // todo: we are assigning all textareas the same editor variable, check whether this has bad side-effects
+        var editor = CodeMirror.fromTextArea(textareas[i], {
+            height: textboxHeight,
+            width: "1000px",
+            parserfile: "parsexml.js",
+            stylesheet: "../css/xmlcolors.css",
+            path: "../js/",
+            continuousScanning: 500,
+            lineNumbers: true
+        });
+    }
+
+    
+
+    //adding <br/> to linebreaks in code section, so editing is easier
+    codes = $('p.code');
+    for (i = 0; i <codes.length; i++){
+        $(codes[i]).html($(codes[i]).text().replace(/\n/mg,'<br/>'));
+    }
+
+</script>
+
+
+</body>
+</html>

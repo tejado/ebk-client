@@ -1,0 +1,256 @@
+<html>
+<head>
+    <script src="../js/codemirror.js" type="text/javascript"></script>
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<title>ecg common API documentation</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../webapp/css/docs.css"/>
+<style type="text/css">
+    .CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #eee;
+        text-align: right;
+        padding-right: .3em;
+        font-size: 10pt;
+        font-family: monospace;
+        padding-top: .4em;
+    }
+
+    .code {
+        background-color: #EEEEEE;
+    }
+
+    table {
+        margin-top : 10px;
+        margin-bottom : 30px;
+    }
+
+</style>
+
+</head>
+
+<body style="padding: 20px;">
+
+
+
+<a href="home.html"><img src="../img/api-logo-middle.png" border="0"/></a><br/>
+eBay-Classifieds API documentation, specification version: 1.8 <br/><br/>
+
+    <!--todo change this to <div> style layout-->
+
+<a href="home.html">Home navigation</a>
+
+<h1>Page pictures</h1>
+
+
+<hr/>
+Pictures are related to an ad. Uploading pictures is necessary before you are doing <a href="ads.html#write-ad">ads write</a>.
+
+<h1>Upload Pictures</h1>
+
+<h2>Method/URL</h2>
+<p class="code">
+POST /pictures
+</p>
+
+The upload is single-picture based only, for stability bulk uploads (difficult to find timeouts and danger
+of server-thread contention) aren't supported. Consider <a href="performance.html#pictures">performance tweaks</a>
+for picture uploads.
+
+<h2><a name="by-multipart">Upload by byte-stream (multipart-style)</a></h2>
+MIME Type <a href="http://tools.ietf.org/html/rfc2388" target="_blank">'multipart/form-data'</a> can be used to transmit
+files content and is recommended if you have access to the image as a file. <br/><br/>
+
+Sample call with 'curl' tool:
+<p class="code">
+# take local file 'img_7840.jpg' and upload in multipart/form-data MIME type 
+curl -v -F file=@img_7840.jpg http://api-domain.com/api/pictures
+</p>
+
+Sample multipart/form-data request payload:
+<textarea class="xml">
+POST /api/pictures HTTP/1.1
+User-Agent: curl/7.19.6 (i686-pc-cygwin) libcurl/7.19.6 OpenSSL/0.9.8l zlib/1.2.3 libidn/1.15 libssh2/1.2
+Host: api-domain.com
+Accept: */*
+Content-Length: 1915764
+Content-Type: multipart/form-data; boundary=--------------------
+--------9771094566ee
+
+------------------------------9771094566ee
+Content-Disposition: form-data; name="file"; filename="img_7840.
+jpg"
+Content-Type: image/jpeg
+
+....'.Exif..II*...............z.................................
+..................(...........2.......................i.........
+..Z...Canon.Canon PowerShot G3..............................2004
+:10:17 14:02:56...................................0220........>.
+..........R.......................n...........v...........~.....
+
+..y=.]y*.8..B\F.....Tp*..+..k!-'..>..8r..s.u-..."......f@:....o
+u..Q..WD...1.......h..NN...j....d..f.....4.r...E{.....
+
+------------------------------9771094566ee--
+</textarea>
+
+<br/>
+Sample response:
+<textarea class="xml">
+Response Header:
+HTTP/1.1 201 Created
+Server: Apache-Coyote/1.1
+ETag: "0d41d8cd98f00b204e9800998ecf8427e"
+Content-Length: 0
+Date: Sat, 27 Feb 2010 00:49:26 GMT
+
+Response Payload:
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<pic:picture ...>
+    <pic:link rel="thumbnail"
+        href="http://img1.qa.classistatic.com/cps/kjqa/100224/500qar1/790510g_24.jpeg?set_id=PAD001" />
+    <pic:link rel="extraLarge"
+        href="http://img1.qa.classistatic.com/cps/kjqa/100224/500qar1/790510g_20.jpeg?set_id=PAD001" />
+    <pic:link rel="normal"
+        href="http://img1.qa.classistatic.com/cps/kjqa/100224/500qar1/790510g_26.jpeg?set_id=PAD001" />
+    <pic:link rel="teaser"
+        href="http://img1.qa.classistatic.com/cps/kjqa/100224/500qar1/790510g_25.jpeg?set_id=PAD001" />
+    <pic:link rel="large"
+        href="http://img1.qa.classistatic.com/cps/kjqa/100224/500qar1/790510g_27.jpeg?set_id=PAD001" />
+</pic:picture>
+
+</textarea>
+
+<h2><a name="by-url">Upload by URL</a></h2>
+Uploading by URL is easier if you don't have the image-content as file but a picture URL. For simplicity the
+url is added as URL parameter ('url=xxxx'). Be aware that the 'url' parameter value needs to be URL encoded.
+<br/><br/>
+Sample call ('curl'):
+<p class="code">
+curl -X POST -vv "http://localhost:8080/api/pictures?url=http%3A%2F%2Fc3.ac-images%2Fimages02%2F96%2Fl_46.jpg"
+</p>
+
+<h2>Sample response payload</h2>
+
+For both multipart/form-data or URL style the same response-payload pattern is returned.
+<textarea class="xml">
+Response Header:
+HTTP/1.1 201 Created
+Server: Apache-Coyote/1.1
+ETag: "0d41d8cd98f00b204e9800998ecf8427e"
+Content-Length: 0
+Date: Sat, 27 Feb 2010 00:49:26 GMT
+
+Response Payload:
+<pic:picture ...>
+
+    <!-- for the wanted size refer to the rel="..." value -->
+
+    <!-- thumbnail picture -->
+    <pic:link rel="thumbnail"
+        href="http://img1.qa.classistatic.com/cps/kjqa/100224/500qar1/790510g_24.jpeg?set_id=PAD001" />
+    <!-- normal picture -->
+    <pic:link rel="normal"
+    href="http://img1.qa.classistatic.com/cps/kjqa/100224/500qar1/790510g_26.jpeg?set_id=PAD001" />
+    <!-- extra-large picture -->
+    <pic:link rel="extraLarge"
+              href="http://img1.qa.classistatic.com/cps/kjqa/100224/500qar1/790510g_20.jpeg?set_id=PAD001" />
+</pic:picture>
+
+</textarea>
+
+Notice that the defined sizes and resolutions ('rel' attribute value like 'thumbnail') can differ between
+the <a href="intro.html#differences">platform implementations</a>.
+
+
+<h2><a name="ad-payload">Preparing pictures for Post/Write-Ad</a></h2>
+After uploading the images you have to concat the response payloads and inline them to the ad for
+<a href="ads.html#write-ad">post-ad</a>. Concatenating works that you simply append the picture response payload and
+nest the result-text inside the '&lt;pictures ....&gt;&lt;/pictures&gt;' tag.
+
+<textarea class="xml">
+Uploaded picture 1 (first /pictures request):
+<pic:picture ...>
+
+    <pic:link rel="thumbnail"
+              href="http://img1.qa.classistatic.com/image1"/>
+    ....
+</pic:picture>
+
+Uploaded picture 2 (second /pictures request):
+<pic:picture ...>
+
+    <pic:link rel="thumbnail"
+        href="http://img1.qa.classistatic.com/image2" />
+    ....
+</pic:picture>
+</textarea>
+<br/>
+Resulting concatenated pictures-collection:
+<textarea class="xml">
+<!-- collections container -->
+<pic:pictures>
+
+    <!--picture 1 -->
+    <pic:picture ...>
+        <pic:link rel="thumbnail"
+                  href="http://img1.qa.classistatic.com/image1"/>
+        ....
+    </pic:picture>
+
+    <!--picture 2 -->
+    <pic:picture ...>
+        <pic:link rel="thumbnail"
+                  href="http://img1.qa.classistatic.com/image2"/>
+        ....
+    </pic:picture>
+
+</pic:pictures>
+</textarea>
+
+Later in <a href="ads.html#write-ad">post-ad</a> you then need to nest the pictures container tag inside &lt;ad&gt;...&lt;/ad&gt; tag.
+
+<h2>Additional Notes</h2>
+Currently uploading multiple pictures in one call is not possible.
+
+
+
+<hr/>
+eBay-Classifieds API documentation, specification version: 1.8
+
+<script type="text/javascript">
+
+    // all textareas with class 'xml' should be formatted nicely
+    textareas = $('textarea.xml');
+
+    for (i = 0; i < textareas.length; i++) {
+
+        var lines = textareas[i].value.split("\n").length;
+        // we dynamically calculate the textbox area height to avoid uneccessary frontend configuration 
+        var textboxHeight = lines * 18 + "px";
+
+        // todo: we are assigning all textareas the same editor variable, check whether this has bad side-effects
+        var editor = CodeMirror.fromTextArea(textareas[i], {
+            height: textboxHeight,
+            width: "1000px",
+            parserfile: "parsexml.js",
+            stylesheet: "../css/xmlcolors.css",
+            path: "../js/",
+            continuousScanning: 500,
+            lineNumbers: true
+        });
+    }
+
+    
+
+    //adding <br/> to linebreaks in code section, so editing is easier
+    codes = $('p.code');
+    for (i = 0; i <codes.length; i++){
+        $(codes[i]).html($(codes[i]).text().replace(/\n/mg,'<br/>'));
+    }
+
+</script>
+
+
+</body>
+</html>

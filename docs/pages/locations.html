@@ -1,0 +1,228 @@
+<html>
+<head>
+    <script src="../js/codemirror.js" type="text/javascript"></script>
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<title>ecg common API documentation</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../webapp/css/docs.css"/>
+<style type="text/css">
+    .CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #eee;
+        text-align: right;
+        padding-right: .3em;
+        font-size: 10pt;
+        font-family: monospace;
+        padding-top: .4em;
+    }
+
+    .code {
+        background-color: #EEEEEE;
+    }
+
+    table {
+        margin-top : 10px;
+        margin-bottom : 30px;
+    }
+
+</style>
+
+</head>
+
+<body style="padding: 20px;">
+
+
+
+<a href="home.html"><img src="../img/api-logo-middle.png" border="0"/></a><br/>
+eBay-Classifieds API documentation, specification version: 1.8 <br/><br/>
+
+    <!--todo change this to <div> style layout-->
+
+<a href="home.html">Home navigation</a>
+
+<h1>Page locations</h1>
+
+
+<hr/>
+<ul xmlns:ad="http://www.ebayclassifiedsgroup.com/schema/ad/v1">
+    <li><a href="#structure">Structure</a></li>
+    <li><a href="#single">Single location</a></li>
+    <li><a href="#search">Search locations</a></li>
+</ul>
+
+<h1><a name="structure">Structure</a></h1>
+
+<p>
+Locations are represented by a tree/hierachy structure. Children of locations are its subareas/sublocations:
+
+<textarea class="xml">
+<loc:location id="2600001">
+    <loc:id-name>bayarea</loc:id-name>
+    <loc:localized-name>San Francisco Bay Area</loc:localized-name>
+    ...
+    <loc:location id="2600041">
+        <loc:id-name>northbay</loc:id-name>
+        <loc:localized-name>North Bay</loc:localized-name>
+        ...
+    </loc:location>
+    <loc:location id="2600043">
+        <loc:id-name>peninsula</loc:id-name>
+        <loc:localized-name>Peninsula</loc:localized-name>
+        ...
+    </loc:location>
+</loc:location>
+</textarea>
+</p>
+
+<p>
+Each location also can have associated regions. The region context is found inside the attribute 'localized-label'.
+<textarea class="xml">
+<loc:location id="2600044">
+    <loc:id-name>eastbay</loc:id-name>
+    ...
+    <loc:regions localized-label="State">
+        <loc:region>
+            <loc:id-name>CA</loc:id-name>
+            <loc:localized-name>California</loc:localized-name>
+        </loc:region>
+    </loc:regions>
+</loc:location>
+</textarea>
+</p>
+
+<h1><a name="single">Single Location</a></h1>
+
+<h2>URL</h2>
+
+/locations/{locationId}
+
+<p>
+The location-id is attached to the location resource itself:
+<textarea class="xml">
+<loc:location id="2600044">
+    ...
+</loc:location>
+</textarea>
+</p>
+
+To find/lookup location ids, browse/search through the location tree and use the resource <a href="#search">Search
+    locations</a>.
+
+
+<h2>Parameters</h2>
+<ul>
+    <li><b>includeParentPath</b>: Include the parent path (as parent nodes) of found location.</li>
+    <li><b>depth</b>: To reduce payload depth parameter can limit the children included in respons. If passed 0 no
+        location children are shown at all. If passed 1 one level of children are shown. If passed 2, two level down the
+        location hierachy are shown. and so on...
+    </li>
+</ul>
+
+<h2>Sample calls</h2>
+
+<p class="code">
+    # lookup single location which has id 3331
+    GET /locations/3331
+
+    # lookup single location by id and limit the level of location children to one level
+    # (no grandchildren locations are shown)<br/>
+    GET /locations/3331?depth=1
+
+    # lookup single location and include the location parent path
+    GET /locations/3331?includeParentPath=true
+</p>
+
+
+<h1><a name="search">Search Locations</h1>
+<h2>URL</h2>
+/locations
+
+<h2>Parameters</h2>
+Parameters for searching locations:
+<ul>
+    <li><b>q</b>: Freetext search on location (e.g. by name, zipcode).</li>
+    <li><b>latitude</b>: Location search by latitude (longitude must be passed also).</li>
+    <li><b>longitude</b>: Location search by longitude (latitude must be passed also).</li>
+</ul>
+
+Result set parameters:
+<ul>
+    <li><b>includeParentPath</b>: Include the parent path (as parent nodes) of found location.</li>
+    <li><b>depth</b>: To reduce payload depth parameter can limit the children included in respons. If passed 0 no
+        location children are shown at all. If passed 1 one level of children are shown. If passed 2, two level down the
+        location hierachy are shown. and so on...
+    </li>
+</ul>
+
+Go to (place link here) to see which location search parameters are supported by your platform.
+
+<h2>Sample calls</h2>
+Quick start sample calls:
+<p class="code">
+    # get whole location tree
+    GET /locations
+
+    # get location by lat/long
+    GET /locations?latitude=23.21&longitude=32.11
+
+    # get locations which are resolved by freetext 'Berlin'
+    GET /locations?q=Berlin
+
+    # give found locations
+    # Provide all locations resolved by 'Berlin' and do NOT show its location children 
+    GET /locations?q=Berlin&depth=0
+    
+    # Also display the parent path of found location (e.g. 'Munich' response would also 
+    # include 'Bavaria' as parent location node 
+    GET /locations?q=Munich&includeParentPath=true 
+
+</p>
+
+<h2><a name="search-metadata">Location search-metadata</a></h2>
+<h3>Method/URL</h3>
+GET /locations/search-metadata
+
+<br/><br/>
+For the semantics of search check <a href="common-metadata.html#collection">collection-metadata</a>.
+
+
+
+<hr/>
+eBay-Classifieds API documentation, specification version: 1.8
+
+<script type="text/javascript">
+
+    // all textareas with class 'xml' should be formatted nicely
+    textareas = $('textarea.xml');
+
+    for (i = 0; i < textareas.length; i++) {
+
+        var lines = textareas[i].value.split("\n").length;
+        // we dynamically calculate the textbox area height to avoid uneccessary frontend configuration 
+        var textboxHeight = lines * 18 + "px";
+
+        // todo: we are assigning all textareas the same editor variable, check whether this has bad side-effects
+        var editor = CodeMirror.fromTextArea(textareas[i], {
+            height: textboxHeight,
+            width: "1000px",
+            parserfile: "parsexml.js",
+            stylesheet: "../css/xmlcolors.css",
+            path: "../js/",
+            continuousScanning: 500,
+            lineNumbers: true
+        });
+    }
+
+    
+
+    //adding <br/> to linebreaks in code section, so editing is easier
+    codes = $('p.code');
+    for (i = 0; i <codes.length; i++){
+        $(codes[i]).html($(codes[i]).text().replace(/\n/mg,'<br/>'));
+    }
+
+</script>
+
+
+</body>
+</html>

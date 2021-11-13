@@ -1,0 +1,243 @@
+<html>
+<head>
+    <script src="../js/codemirror.js" type="text/javascript"></script>
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<title>ecg common API documentation</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../webapp/css/docs.css"/>
+<style type="text/css">
+    .CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #eee;
+        text-align: right;
+        padding-right: .3em;
+        font-size: 10pt;
+        font-family: monospace;
+        padding-top: .4em;
+    }
+
+    .code {
+        background-color: #EEEEEE;
+    }
+
+    table {
+        margin-top : 10px;
+        margin-bottom : 30px;
+    }
+
+</style>
+
+</head>
+
+<body style="padding: 20px;">
+
+
+
+<a href="home.html"><img src="../img/api-logo-middle.png" border="0"/></a><br/>
+eBay-Classifieds API documentation, specification version: 1.16 <br/><br/>
+
+    <!--todo change this to <div> style layout-->
+
+
+<hr/>
+<h1>Common information (resource agnostic)</h1>
+<ul>
+    <li><a href="intro.html">Introduction</a></li>
+    <li><a href="versioning.html">Versioning</a></li>
+    <li><a href="schemas.html">Domain-Model/XSD reference</a></li>
+    <li><a href="common-params.html">Common parameters</a></li>
+    <li><a href="common-metadata.html">Common metadata</a></li>
+    <li><a href="security.html">Security (Authentication, Authorization)</a></li>
+    <li><a href="response-codes.html">Response codes, Error Handling</a></li>
+    <li><a href="performance.html">Performance tweaks</a></li>
+    <li><a href="statuses.html">API Availability</a></li>
+    <li><a href="best-practices.html">API Client Best Practices</a></li>
+    </ul>
+
+<h1><a name="resources">Ads-Classifieds domain resources</a></h1>
+<ul>
+
+    <li><a href="locations.html">Locations</a></li>
+    <li><a href="categories.html">Categories</a></li>
+    <li><a href="ads.html">Ads</a></li>
+    <li><a href="users.html">Users</a></li>
+    <li><a href="pictures.html">Pictures</a></li>
+    <li><a href="partners.html">Partners</a></li>
+    <li><a href="replies.html">Replies/Contact</a></li>
+    <li><a href="alerts.html">Alerts</a></li>
+    <li><a href="counters.html">Counters</a></li>
+    <li><a href="suggestions.html">Suggestions</a></li>
+    <li><a href="features.html">Features</a></li>
+</ul>
+
+<hr/>
+
+<h1>Release Notes</h1>
+Following release notes scope are ticket from api-client visible scope:
+<h2><a name="latest">1.16</a></h2>
+<ul>
+    <li>#10: Added radius info inside data-field <b>&lt;ad&gt;...&lt;address&gt;&lt;radius&gt;{addressRadius}&lt;radius&gt;...&lt;/address&gt;&lt;/ad&gt;</b>.
+        This way radius info can get attached on address level (e.g. related to more detailed street + housenr. information)</li>
+    <li>Added fields to support contact name, contact email, visible on map <b>&lt;ad&gt;...
+        &lt;poster-contact-email&gt;bob@smith.com&lt;/poster-contact-email&gt;
+        &lt;poster-contact-name&gt;Bob Smith&lt;/poster-contact-name&gt;
+        &lt;visible-on-map&gt;true&lt;/visible-on-map&gt;
+        ...&lt;/ad&gt;</b></li>
+    <li>#8: Added support for conversations (Message Center) (see <a href="users.html#conversations"> user conversations docs</a>, <a href="replies.html#reply-ad-conversation"> replies docs</a>)</li>            
+</ul>
+
+
+<h2>1.15</h2>
+<ul>
+    <li>#2: Added support for auto suggestions (see <a href="suggestions.html#ad-search">docs</a>)</li>
+</ul>
+
+
+<h2>1.14</h2>
+<ul>
+    <li>ECG-69: Added support for User Watchlist (see <a href="users.html#watchlist">docs</a>)</li>
+    <li>ECG-68: Added support Search Distance, displaying distance for Ads when doing location based search (see <a href="ads.html#search-distance">docs</a>)</li>
+    <li>ECG-66: Added support for counters (see <a href="counters.html">docs</a>)</li>
+</ul>
+
+
+<h2>1.13</h2>
+<ul>
+    <li>ECG-59: Added support for <b>&lt;account-id&gt;</b> to ad</li>
+    <li>ECG-60: Added support for <b>&lt;username&gt;</b> inside reply-ad payload (<a href="replies.html#reply-ad">see docs</a>)</li>
+    <li>ECG-61: Added support for Alerts(<a href="alerts.html">see docs</a>), also added device-based authentication (<a href="security.html#user-auth">see Security section X-ECG-Authenticate-Device</a>)</li>
+    <li>ECG-65: Add poster type option for searches</li>
+</ul>
+
+<h2>1.12</a></h2>
+<ul>
+    <li>ECG-55: Support of dependent-attributes (<a href="ads.html#dep-attributes">see docs</a>)</li>
+</ul>
+
+<h2>1.11</h2>
+Feature:
+<ul>
+    <li>ECG-49: Changing ad's state of user to PAUSED and ACTIVE (<a href="users.html#state-change-user">see docs</a>)</li>
+    <li>ECG-52: Offer more self-references of ad for self-users self-partner (<a href="ads.html#view-ad-links">see docs</a>)</li>
+
+</ul>
+
+Improvement:
+<ul>
+    <li>ECG-48: Collapsing single version-schema to single one XSD, e.g. instead of ad-1.1.xsd, ad-1.3.xsd there now is only one
+    single ad.xsd. Version is still maintained on the 'version' attribute inside XSD (<a href="versioning.html#xsd-version">see docs</a>).</li>
+</ul>
+
+
+<h2>1.10</a></h2>
+Feature:
+<ul>
+    <li>ECG-39: Ability to retrieve user profile data for an authenticated user (<a href="users.html#profile">profile</a>, <a href="users.html#login">login</a>)</li>
+    <li>ECG-41: Retrieve User alerts (<a href="users.html#alerts">alerts</a>)</li>
+</ul>
+
+<h2>1.9</h2>
+Feature:
+<ul>
+    <li>ECG-29: Gumtree Common API Impl - add missing elements to XSDs</li>
+    <li>ECG-30: Fix .json Common API JSON output format (JSON2) (<a href="schemas.html#response">see docs</a>)</li>
+    <li>ECG-34: Support for &lt;parent-id&gt; and &lt;children-count&gt; optional elements for &lt;category&gt; and &lt;location&gt;</li>
+</ul>
+
+<h2>1.8</h2>
+Feature:
+<ul>
+    <li>ECG-23: Support User authentication (<a href="security.html#user-auth">see docs</a>)</li>
+    <li>ECG-25: Users Ads resources (<a href="users.html#ads">see docs</a>)</li>
+    <li>ECG-27: Extend Ad (see docs <a href="users.html#extend-ad">users</a>, <a href="ads.html#extend-ad">ads</a>, <a href="partners.html#extend-ad">partners</a>)</li>
+</ul>
+
+
+
+<h2>1.7</h2>
+Feature:
+<ul>
+    <li>ECG-21: Ads search parameter 'modAfter' and 'modBefore' for doing time-bases searches on ads
+        (<a href="ads.html#other-search">see docs</a>)</li>
+    <li>ECG-22: Official histograms support (<a href="ads.html#histograms">see docs</a>)</li>
+</ul>
+
+Bug-Fix:
+<ul>
+    <li>ECG-26: Double decoding of (<a href="pictures.html">/pictures upload</a>) by URL (one decoding enough).</li>
+</ul>
+
+
+<h2>1.6</h2>
+Feature:
+<ul>
+    <li>ECG-18: Ads search parameter 'pictureRequired' for finding ads with pictures only (<a href="ads.html#other-search">see docs</a>)</li>
+</ul>
+
+Bug-Fix:
+<ul>
+    <li>ECG-20: _in parameter for /partners/{username}/ads not working</li>
+</ul>
+
+
+<h2>1.5</h2>
+Feature:
+<ul>
+    <li>ECG-3: Ad confirmation resource (<a href="ads.html#confirm-ad">see docs</a>)</li>
+    <li>ECG-11: User lookup and ads search by external-user ids (<a href="partners.html">see docs</a>)</li>
+    <li>ECG-12: Ads search by latitude/longitude (<a href="ads.html#locations-search">see docs</a>)</li>
+    <li>ECG-13: Ads search sorting options (<a href="ads.html#other-search">see docs</a>)</li>
+</ul>
+
+Improvement:
+<ul>
+    <li>ECG-1: 500 status when calling /ads/metadata. Now 404 is returned with better detail message text (metadata
+        not defined without categoryId).</li>
+    <li>ECG-9: Default response format is XML (used to be undefined if "Accept: " Header was empty)</li>
+</ul>
+
+Bug-Fix:
+<ul>
+    <li>ECG-14: Inconsistent paging links for partners search (/partners/xx/ads displayed links pointed to /ads)</li>
+</ul>
+
+
+<hr/>
+eBay-Classifieds API documentation, specification version: 1.16
+
+<script type="text/javascript">
+
+    // all textareas with class 'xml' should be formatted nicely
+    textareas = $('textarea.xml');
+
+    for (i = 0; i < textareas.length; i++) {
+
+        var lines = textareas[i].value.split("\n").length;
+        // we dynamically calculate the textbox area height to avoid uneccessary frontend configuration 
+        var textboxHeight = lines * 18 + "px";
+
+        // todo: we are assigning all textareas the same editor variable, check whether this has bad side-effects
+        var editor = CodeMirror.fromTextArea(textareas[i], {
+            height: textboxHeight,
+            width: "1000px",
+            parserfile: "parsexml.js",
+            stylesheet: "../css/xmlcolors.css",
+            path: "../js/",
+            continuousScanning: 500,
+            lineNumbers: true
+        });
+    }
+
+    
+
+    //adding <br/> to linebreaks in code section, so editing is easier
+    codes = $('p.code');
+    for (i = 0; i <codes.length; i++){
+        $(codes[i]).html($(codes[i]).text().replace(/\n/mg,'<br/>'));
+    }
+
+</script>
+
+
+</body>
+</html>

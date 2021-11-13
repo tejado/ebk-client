@@ -1,0 +1,141 @@
+<html>
+<head>
+    <script src="../js/codemirror.js" type="text/javascript"></script>
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<title>ecg common API documentation</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../webapp/css/docs.css"/>
+<style type="text/css">
+    .CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #eee;
+        text-align: right;
+        padding-right: .3em;
+        font-size: 10pt;
+        font-family: monospace;
+        padding-top: .4em;
+    }
+
+    .code {
+        background-color: #EEEEEE;
+    }
+
+</style>
+
+</head>
+
+<body style="padding: 20px;">
+
+    <!--todo change this to <div> style layout-->
+<a href="home.html">Home navigation</a>
+
+<h1>Page security</h1>
+
+
+<hr/>
+<h1>Authentication</h1>
+ECG Common Api authentication is done through HTTP Digest Authentication (see also <a href="http://tools.ietf.org/html/rfc2069" target="_blank">RFC2069</a>).<br/>
+
+It is supported by several tools like:
+<ul>
+    <li><a href="http://curl.haxx.se/" target="_blank">curl</a></li>
+    <li><a href="http://hc.apache.org/httpcomponents-client-4.0.1/index.html" target="_blank">Commons Http-Client</a> (java-based)</li>
+    <li><a href="http://www.gnu.org/software/wget/" target="_blank">wget</a>: Watch out that wget version you use has fixed bug
+        (see <a href="https://bugs.launchpad.net/ubuntu/+source/wget/+bug/530036" target="_blank">bug-report</a>).</li>
+    <li>Several browsers which support HTTP digest (e.g. Firefox 3.6.x)</li>
+</ul>
+
+When authentication fails you will get an <a href="response-codes.html#401">HTTP 401 error</a>.
+
+<h2>curl</h2>
+curl sample snippet:
+<p class="code">
+curl http://api.ebay-kleinanzeigen.de/api/ads --digest -u username:password
+</p>
+
+<h2>Http-Client (Java based)</h2>
+
+Sample code snippet for Http-Client (of version 3.1) to get authentication working:
+<textarea class="xml">
+import org.apache.commons.httpclient.*
+import org.apache.commons.httpclient.methods.*
+import org.apache.commons.httpclient.auth.*
+
+...
+private static final String REALM_NAME = "ebay-kleinanzeigen-api";
+private static final String HOST = "api.ebay-kleinanzeigen.de";
+...
+
+HttpClient client = new HttpClient();
+
+// preemptive makes sense to save one request/response roundtrip in case you always connect to the api,
+// otherwise it could be a security problem, because HTTP request is sent to any server connecting
+client.getParams().setAuthenticationPreemptive(true);
+
+Credentials credentials = new UsernamePasswordCredentials("username", "password");
+client.getState().setCredentials(new AuthScope(HOST, 80 , REALM_NAME), credentials);
+HttpMethod method = new GetMethod("http://api.ebay-kleinanzeigen.de/api/ads");
+assert client.executeMethod(method) == 200;
+</textarea>
+
+TODO: show more information on preemtive authentication (it changed on http-client 4.1). Mention, that it is less secure because no 
+server challenge given or is overridden by client (nonce). Look at
+<a target="_blank" href="http://svn.apache.org/repos/asf/httpcomponents/httpclient/tags/4.0.1/httpclient/src/examples/org/apache/http/examples/client/ClientPreemptiveDigestAuthentication.java">Sample</a>. 
+
+
+<h1>Authorization</h1>
+
+<h2>Resource based</h2>
+Authentication proves 'who' you are. Authorization describes 'what' you are allowed to do. There are several rules on
+access restrictions:
+<ul>
+    <li>Access on complete resource: You are NOT allowed to access a resource (e.g. /partners*)</li>
+    <li>Access on HTTP method: You are allowed to do 'GET /ads' but NOT allowed to do 'POST /ads'</li>
+</ul>
+
+Above rules are up to the platform implementor of the ECG Common Api. Please contact the respective developers.
+In case authorization on above rules fails you will get a <a href="response-codes.html#403-resource">HTTP 403 error (resource)</a>.
+
+<h2>Rate based</h2>
+The numbers of calls per resource and method can be limited to a specific api-client .
+TODO@Nik
+
+In case authorization on above rules fails you will get a <a href="response-codes.html#403-rate">HTTP 403 error (rate)</a>.
+
+<hr/>
+<script type="text/javascript">
+
+    // all textareas with class 'xml' should be formatted nicely
+    textareas = $('textarea.xml');
+
+    for (i = 0; i < textareas.length; i++) {
+
+        var lines = textareas[i].value.split("\n").length;
+        // we dynamically calculate the textbox area height to avoid uneccessary frontend configuration 
+        var textboxHeight = lines * 18 + "px";
+
+        // todo: we are assigning all textareas the same editor variable, check whether this has bad side-effects
+        var editor = CodeMirror.fromTextArea(textareas[i], {
+            height: textboxHeight,
+            width: "1000px",
+            parserfile: "parsexml.js",
+            stylesheet: "../css/xmlcolors.css",
+            path: "../js/",
+            continuousScanning: 500,
+            lineNumbers: true
+        });
+    }
+
+    
+
+    //adding <br/> to linebreaks in code section, so editing is easier
+    codes = $('p.code');
+    for (i = 0; i <codes.length; i++){
+        $(codes[i]).html($(codes[i]).text().replace(/\n/mg,'<br/>'));
+    }
+
+</script>
+
+
+</body>
+</html>

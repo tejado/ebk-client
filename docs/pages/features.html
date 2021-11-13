@@ -1,0 +1,350 @@
+<html>
+<head>
+    <script src="../js/codemirror.js" type="text/javascript"></script>
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<title>ecg common API documentation</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../webapp/css/docs.css"/>
+<style type="text/css">
+    .CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #eee;
+        text-align: right;
+        padding-right: .3em;
+        font-size: 10pt;
+        font-family: monospace;
+        padding-top: .4em;
+    }
+
+    .code {
+        background-color: #EEEEEE;
+    }
+
+    table {
+        margin-top : 10px;
+        margin-bottom : 30px;
+    }
+
+</style>
+
+</head>
+
+<body style="padding: 20px;">
+
+
+
+<a href="home.html"><img src="../img/api-logo-middle.png" border="0"/></a><br/>
+eBay-Classifieds API documentation, specification version: 1.16 <br/><br/>
+
+    <!--todo change this to <div> style layout-->
+
+<a href="home.html">Home navigation</a>
+
+<h1>Page features</h1>
+
+
+<hr/>
+<h1>Features</h1>
+
+<p>Allow a client to display features that are available for a particular target entity - ad, user, etc - and apply a set of those features to a particular target</p>
+
+<p>Feature resources can be divided into those that return data allowing the client to display available features to the user, and those that apply a feature to a particular target</p>
+
+<h2>Finding available features</h2>
+
+<h3>Method & Resource</h3>
+
+<p><strong>GET /features</strong></p>
+
+<p>Returns the list of targets available. <br>
+    Use this resource to build the child resource URL (/features/{target} described below) that will return the list of features available for the particular target type.<br>
+    Each features-target element in the list specifies, via attributes, whether the category id and/or location id must be supplied for the /features/{target} child resource</p>
+
+<h6>Response Codes</h6>
+
+<p>200 OK</p>
+
+<h6>Sample Response</h6>
+
+<textarea class="xml">
+<feat:features xmlns:types="http://www.ebayclassifiedsgroup.com/schema/types/v1"
+               xmlns:feat="http://www.ebayclassifiedsgroup.com/schema/feature/v1">
+<feat:features>
+    <feat:feature-target target="ad" category-id="required" location-id="required"/>
+    <feat:feature-target target="user" category-id="required" location-id="optional"/>
+</feat:features>
+</textarea>
+
+<h3>Method &amp; Resource</h3>
+
+<p><strong>GET /features/{target}?[categoryId={catId}&amp;locationId={locId}]</strong></p>
+
+<p>Returns the set of features available for the target type, grouped by feature group.</p>
+
+<p>categoryId param - presence is determined by the value of the <em>category-id</em> attribute on the features:feature-target element acquired from the parent /features resource<br>
+    locationId param - presence is determined by the value of the <em>location-id</em> attribute on the features:feature-target element acquired from the parent /features resource</p>
+
+<h6>Response Codes</h6>
+
+<p>200 OK<br>
+    400 categoryId or locationId is missing when it is required</p>
+
+<h6>Sample Response</h6>
+
+<textarea class="xml">
+<feat:feature-groups xmlns:types="http://www.ebayclassifiedsgroup.com/schema/types/v1"
+                     xmlns:feat="http://www.ebayclassifiedsgroup.com/schema/feature/v1">
+    <feat:feature-group group="standard">
+        <feat:feature name="AD_URGENT">
+            <feat:description>Highlight that your sale is urgent!</feat:description>
+            <feat:options>
+                <feat:option>
+                    <feat:feature-duration>
+                        <types:value>7</types:value>
+                        <types:period><types:value>DAY</types:value></types:period>
+                    </feat:feature-duration>
+                    <feat:feature-price>
+                        <feat:currency-iso-code>
+                            <types:value localized-label="$">AUD</types:value>
+                        </feat:currency-iso-code>
+                        <feat:amount>2.99</feat:amount>
+                    </feat:feature-price>
+                </feat:option>
+            </feat:options>
+        </feat:feature>
+        <feat:feature name="AD_HIGHLIGHT">
+            <feat:description>Highlight your ad to gain visibility and stand out from the crowd!
+            </feat:description>
+            <feat:options>
+                <feat:option>
+                    <feat:feature-duration>
+                        <types:value>7</types:value>
+                        <types:period><types:value>DAY</types:value></types:period>
+                    </feat:feature-duration>
+                    <feat:feature-price>
+                        <feat:currency-iso-code>
+                            <types:value localized-label="$">AUD</types:value>
+                        </feat:currency-iso-code>
+                        <feat:amount>1.99</feat:amount>
+                    </feat:feature-price>
+                </feat:option>
+            </feat:options>
+        </feat:feature>
+        <feat:feature name="AD_GP_HP_GALLERY">
+            <feat:description>Have your Ad be seen on the Gumtree homepage by thousands of people!
+            </feat:description>
+            <feat:options>
+                <feat:option>
+                    <feat:feature-duration>
+                        <types:value>7</types:value>
+                        <types:period><types:value>DAY</types:value></types:period>
+                    </feat:feature-duration>
+                    <feat:feature-price>
+                        <feat:currency-iso-code>
+                            <types:value localized-label="$">AUD</types:value>
+                        </feat:currency-iso-code>
+                        <feat:amount>9.99</feat:amount>
+                    </feat:feature-price>
+                </feat:option>
+            </feat:options>
+        </feat:feature>
+        <feat:feature name="AD_GP_TOP_AD">
+            <feat:description>AD_GP_TOP_AD</feat:description>
+            <feat:options>
+                <feat:option>
+                    <feat:feature-duration>
+                        <types:value>7</types:value>
+                        <types:period><types:value>DAY</types:value></types:period>
+                    </feat:feature-duration>
+                    <feat:feature-price>
+                        <feat:currency-iso-code>
+                            <types:value localized-label="$">AUD</types:value>
+                        </feat:currency-iso-code>
+                        <feat:amount>4.99</feat:amount>
+                    </feat:feature-price>
+                </feat:option>
+            </feat:options>
+        </feat:feature>
+        <feat:feature name="AD_BUMP_UP">
+            <feat:description>Save time reposting, Bump your Ad back up to top of the first page. Ads on the first
+                page get noticed more often
+            </feat:description>
+            <feat:options>
+                <feat:option>
+                    <feat:feature-duration>
+                        <types:value>20</types:value>
+                        <types:period><types:value>MINUTE</types:value></types:period>
+                    </feat:feature-duration>
+                    <feat:feature-price>
+                        <feat:currency-iso-code>
+                            <types:value localized-label="$">AUD</types:value>
+                        </feat:currency-iso-code>
+                        <feat:amount>1.49</feat:amount>
+                    </feat:feature-price>
+                </feat:option>
+            </feat:options>
+        </feat:feature>
+    </feat:feature-group>
+</feat:feature-groups>
+</textarea>
+
+<h2>Target application features</h2>
+
+<h3>Method &amp; Resource</h3>
+
+<p><strong>POST /features/{target}/{id}</strong></p>
+
+<p>Apply the set of features to the particular target specified by the {id}<br>
+    Any payment is handled entirely by the client, but the request includes the payment transaction details created during the payment step to allow for a payment record to be created in the system.</p>
+
+<h6>Request Sample</h6>
+
+<textarea class="xml">
+<feat:feature-confirmation xmlns:feat="http://www.ebayclassifiedsgroup.com/schema/feature/v1"
+                           xmlns:types="http://www.ebayclassifiedsgroup.com/schema/types/v1">
+    <feat:features-booked>
+        <feat:feature-booked group="standard" name="AD_URGENT">
+            <feat:option>
+                <feat:feature-duration>
+                    <types:value>1</types:value>
+                    <types:period><types:value>SECOND</types:value></types:period>
+                </feat:feature-duration>
+                <feat:feature-price>
+                    <currency-iso-code>
+                        <types:value>AUD</types:value>
+                    </currency-iso-code>
+                    <amount>100.00</amount>
+                </feat:feature-price>
+            </feat:option>
+        </feat:feature-booked>
+    </feat:features-booked>
+    <feat:payment-authorization payment-id="123456789" payment-provider="Apple"/>
+</feat:feature-confirmation>
+</textarea>
+
+<h6>Response Codes</h6>
+
+<p>200 OK<br>
+    404 No such target and id combination<br>
+    400 target entity not active<br>
+    400 target feature mismatch</p>
+
+<p>Note: The request is atomic - all features in the features-booked list will be applied or, if one or more fails, none will be applied </p>
+
+<h1>Changes to other resources</h1>
+
+<h2>Ad</h2>
+
+<p>Include the list of currently active features in the ad representation. The list is encapsulated in the features-active element which is part of the features namespace. Each active feature includes its start and end date, it's duration and the price paid for the feature.</p>
+
+<textarea class="xml">
+    <ad:ad>
+    .....
+    <feat:features-active>
+        <feat:feature-active name="AD_URGENT" group="standard">
+            <feat:start-date-time>2012-11-12T16:31:05.000+11:00</feat:start-date-time>
+            <feat:end-date-time>2012-11-19T16:31:05.000+11:00</feat:end-date-time>
+            <feat:option>
+                <feat:feature-duration>
+                    <types:value>7</types:value>
+                    <types:period><types:value>DAY</types:value></types:period>
+                </feat:feature-duration>
+                <feat:feature-price>
+                    <feat:currency-iso-code>
+                        <types:value localized-label="$">AUD</types:value>
+                    </feat:currency-iso-code>
+                    <feat:amount>2.99</feat:amount>
+                </feat:feature-price>
+            </feat:option>
+        </feat:feature-active>
+        <feat:feature-active name="AD_HIGHLIGHT" group="standard">
+            <feat:start-date-time>2012-11-12T16:58:32.000+11:00</feat:start-date-time>
+            <feat:end-date-time>2012-11-19T16:58:32.000+11:00</feat:end-date-time>
+            <feat:option>
+                <feat:feature-duration>
+                    <types:value>7</types:value>
+                    <types:period><types:value>DAY</types:value></types:period>
+                </feat:feature-duration>
+                <feat:feature-price>
+                    <feat:currency-iso-code>
+                        <types:value localized-label="$">AUD</types:value>
+                    </feat:currency-iso-code>
+                    <feat:amount>1.99</feat:amount>
+                </feat:feature-price>
+            </feat:option>
+        </feat:feature-active>
+        <feat:feature-active name="AD_BUMP_UP" group="standard">
+            <feat:start-date-time>2012-11-12T18:11:20.000+11:00</feat:start-date-time>
+            <feat:end-date-time>2012-11-12T18:31:20.000+11:00</feat:end-date-time>
+            <feat:option>
+                <feat:feature-duration>
+                    <types:value>20</types:value>
+                    <types:period><types:value>MINUTE</types:value></types:period>
+                </feat:feature-duration>
+                <feat:feature-price>
+                    <feat:currency-iso-code>
+                        <types:value localized-label="$">AUD</types:value>
+                    </feat:currency-iso-code>
+                    <feat:amount>1.49</feat:amount>
+                </feat:feature-price>
+            </feat:option>
+        </feat:feature-active>
+        <feat:feature-active name="AD_GP_TOP_AD" group="standard">
+            <feat:start-date-time>2012-11-12T18:25:49.000+11:00</feat:start-date-time>
+            <feat:end-date-time>2012-11-19T18:25:49.000+11:00</feat:end-date-time>
+            <feat:option>
+                <feat:feature-duration>
+                    <types:value>7</types:value>
+                    <types:period><types:value>DAY</types:value></types:period>
+                </feat:feature-duration>
+                <feat:feature-price>
+                    <feat:currency-iso-code>
+                        <types:value localized-label="$">AUD</types:value>
+                    </feat:currency-iso-code>
+                    <feat:amount>4.99</feat:amount>
+                </feat:feature-price>
+            </feat:option>
+        </feat:feature-active>
+    </feat:features-active>
+    ....
+</ad:ad>
+</textarea>
+<hr/>
+eBay-Classifieds API documentation, specification version: 1.16
+
+<script type="text/javascript">
+
+    // all textareas with class 'xml' should be formatted nicely
+    textareas = $('textarea.xml');
+
+    for (i = 0; i < textareas.length; i++) {
+
+        var lines = textareas[i].value.split("\n").length;
+        // we dynamically calculate the textbox area height to avoid uneccessary frontend configuration 
+        var textboxHeight = lines * 18 + "px";
+
+        // todo: we are assigning all textareas the same editor variable, check whether this has bad side-effects
+        var editor = CodeMirror.fromTextArea(textareas[i], {
+            height: textboxHeight,
+            width: "1000px",
+            parserfile: "parsexml.js",
+            stylesheet: "../css/xmlcolors.css",
+            path: "../js/",
+            continuousScanning: 500,
+            lineNumbers: true
+        });
+    }
+
+    
+
+    //adding <br/> to linebreaks in code section, so editing is easier
+    codes = $('p.code');
+    for (i = 0; i <codes.length; i++){
+        $(codes[i]).html($(codes[i]).text().replace(/\n/mg,'<br/>'));
+    }
+
+</script>
+
+
+</body>
+</html>
