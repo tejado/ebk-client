@@ -11,7 +11,7 @@ domain="api.ebay-kleinanzeigen.de"
 matchType="domain"
 
 #Set datefilter to 1 if you want to download data from specific time period
-datefilter=0
+datefilter=1
 from="20100101120001" #yyyyMMddhhmmss
 to="20300101120001" #yyyyMMddhhmmss
 

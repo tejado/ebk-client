@@ -34,7 +34,7 @@
 
 
 <a href="home.html"><img src="../img/api-logo-middle.png" border="0"/></a><br/>
-eBay-Classifieds API documentation, specification version: 1.11 <br/><br/>
+eBay-Classifieds API documentation, specification version: 1.16 <br/><br/>
 
     <!--todo change this to <div> style layout-->
 
@@ -44,53 +44,205 @@ eBay-Classifieds API documentation, specification version: 1.11 <br/><br/>
 
 
 <hr/>
+<h1>Alerts</h1>
 
-Error reading included file content/alerts.ftl
-The problematic instruction:
-----------
-==> include "content/" + page + ".ftl" [on line 16, column 5 in layout.ftl]
-----------
+<h2>Alert-Types</h2>
+Supported alert-types:
+<table border="1">
+    <tr><th>alert-type</th><th>alert-details</th></tr>
+    <tr>
+        <td>SAVED_SEARCH</td><td>Saved search alerts</td>
+    </tr>
+    <tr>
+        <td>REPLY_AD</td><td>Reply ad alerts</td>
+    </tr>
+</table>
 
-Java backtrace for programmers:
-----------
-freemarker.template.TemplateException: Error reading included file content/alerts.ftl
-	at freemarker.core.Include.accept(Include.java:167)
-	at freemarker.core.Environment.visit(Environment.java:209)
-	at freemarker.core.MixedContent.accept(MixedContent.java:92)
-	at freemarker.core.Environment.visit(Environment.java:209)
-	at freemarker.core.Environment.process(Environment.java:189)
-	at freemarker.template.Template.process(Template.java:237)
-	at org.springframework.web.servlet.view.freemarker.FreeMarkerView.processTemplate(FreeMarkerView.java:366)
-	at org.springframework.web.servlet.view.freemarker.FreeMarkerView.doRender(FreeMarkerView.java:283)
-	at org.springframework.web.servlet.view.freemarker.FreeMarkerView.renderMergedTemplateModel(FreeMarkerView.java:233)
-	at org.springframework.web.servlet.view.AbstractTemplateView.renderMergedOutputModel(AbstractTemplateView.java:167)
-	at org.springframework.web.servlet.view.AbstractView.render(AbstractView.java:250)
-	at org.springframework.web.servlet.DispatcherServlet.render(DispatcherServlet.java:1047)
-	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:817)
-	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:719)
-	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:644)
-	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:549)
-	at javax.servlet.http.HttpServlet.service(HttpServlet.java:617)
-	at javax.servlet.http.HttpServlet.service(HttpServlet.java:717)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:290)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
-	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:233)
-	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:191)
-	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:127)
-	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:102)
-	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:109)
-	at org.objektpark.catalina.stats.valves.MeasureMappingCounterValve.invoke(MeasureMappingCounterValve.java:603)
-	at org.apache.catalina.valves.AccessLogValve.invoke(AccessLogValve.java:554)
-	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:298)
-	at org.apache.jk.server.JkCoyoteHandler.invoke(JkCoyoteHandler.java:190)
-	at org.apache.jk.common.HandlerRequest.invoke(HandlerRequest.java:291)
-	at org.apache.jk.common.ChannelSocket.invoke(ChannelSocket.java:776)
-	at org.apache.jk.common.ChannelSocket.processConnection(ChannelSocket.java:705)
-	at org.apache.jk.common.ChannelSocket$SocketConnection.runIt(ChannelSocket.java:898)
-	at org.apache.tomcat.util.threads.ThreadPool$ControlRunnable.run(ThreadPool.java:690)
-	at java.lang.Thread.run(Thread.java:662)
-Caused by: java.io.FileNotFoundException: Template content/alerts.ftl not found.
-	at freemarker.template.Configuration.getTemplate(Configuration.java:489)
-	at freemarker.core.Environment.getTemplateForInclusion(Environment.java:1464)
-	at freemarker.core.Include.accept(Include.java:157)
-	... 34 more
+SAVED_SEARCHES Example:
+<textarea class="xml">
+    <search-description>Search for Dogs</search-description>
+    <search-link rel="saved-search" href="http://localhost:8080/api/ads?categoryId=216"/>
+</textarea>
+
+<h2>Alert-Status-Type</h2>
+Supported alert-status-types:
+<table border="1">
+    <tr><th>status-type</th><th>status-detail</th></tr>
+    <tr>
+        <td>ACTIVE</td><td>Alert is active, backend listen for new search results and alerts.</td>
+    </tr>
+    <tr>
+        <td>INACTIVE</td><td>Alert is not active, backend will not generate any alerts.</td>
+    </tr>
+</table>
+
+<h2>Alert-Destinations</h2>
+
+Alert destinations define the channel under which the alert is provided:
+<textarea class="xml">
+    <alert-destinations>
+        <alert-destination>
+            <destination-type><value>PUSH_NOTIFICATION</value></destination-type>
+            <destination>23aa-4211-aaff-aas2</destination>
+            <alert-status>ACTIVE</alert-status>
+        </alert-destination>
+    </alert-destinations>
+</textarea>
+
+Supported destination-types:
+<table border="1">
+    <tr><th>destination-type</th><th>destination (details)</th></tr>
+    <tr>
+        <td>PUSH_NOTIFICATION</td><td>device-token</td>
+    </tr>
+    <tr>
+        <td>SMS</td><td>phone-number</td>
+    </tr>
+    <tr>
+        <td>EMAIL</td><td>email address</td>
+    </tr>
+</table>
+
+
+<h2>Create Alert</h2>
+
+<h3>Method/URL</h3>
+<p class="code">
+POST /alerts
+</p>
+
+Expected response codes:
+<ul>
+    <li>201 Created: Successfully created alert Response payload contains the sent payload.</li>
+    <li>400 Bad Request: Validation error (e.g. unknown ad-id).</li>
+</ul>
+
+<h3>Sample payload</h3>
+
+<textarea class="xml">
+
+<alert xmlns="http://www.ebayclassifiedsgroup.com/schema/ad/v1">
+
+    <alert-type><value>SAVED_SEARCH</value></alert-type>
+    <search-description>Search for dogs</search-description>
+    <search-link rel="saved-search" href="http://localhost:8080/api/ads?categoryId=216"/>
+
+    <alert-destinations>
+        <alert-destination>
+            <destination-type><value>PUSH_NOTIFICATION</value></destination-type>
+            <destination>device-token new</destination>
+            <status>ACTIVE</status>
+        </alert-destination>
+    </alert-destinations>
+</alert>
+</textarea>
+
+<h2>Read Alert</h2>
+<p class="code">
+    GET /alerts/{alertId}
+</p>
+
+Expected response codes:
+<ul>
+    <li>200 OK: Update success.</li>
+    <li>403 Unauthorized: Access to alert might be protected (see (<a href="security.html#user-auth">user/device-auth</a>).</li>
+    <li>404 Not Found</li>
+</ul>
+
+<h2>Update Alert</h2>
+<p class="code">
+PUT /alerts/{alertId}
+</p>
+
+Expected response codes:
+<ul>
+    <li>200 OK: Update success.</li>
+    <li>400 Bad Request: Validation error</li>
+    <li>403 Unauthorized: Access to alert might be protected (see (<a href="security.html#user-auth">user/device-auth</a>).</li>
+    <li>404 Not Found</li>
+</ul>
+
+
+<h2>Delete Alert</h2>
+<p class="code">
+    DELETE /alerts/{alertId}
+</p>
+
+Expected response codes:
+<ul>
+    <li>200 OK: Update success.</li>
+    <li>403 Unauthorized: Access to alert might be protected (see (<a href="security.html#user-auth">user/device-auth</a>).</li>
+    <li>404 Not Found</li>
+</ul>
+
+<h2>Search Alerts</h2>
+<p class="code">
+GET /alerts
+</p>
+
+Search-Parameters:
+<table border="1">
+    <tr><th>param-name</th><th>param-detail</th></tr>
+    <tr>
+        <td>deviceToken</td><td>Alerts referenced by certain mobile-device (identified with device-token). In effect
+                                all alerts which have PUSH_NOTIFICATION destination-type</td>
+    </tr>
+    <tr>
+        <td>email</td><td>Alerts which have specific email-address destination-type</td>
+    </tr>
+</table>
+
+Sample-Calls:
+<p class="code">
+# get all alerts
+GET /alerts
+
+# search for alerts connected to device-token
+GET /alerts?deviceToken=aadf-21fd-a1g2-43aa
+
+# by email
+GET /alerts?email=foo@bar.de
+</p>
+
+
+
+
+<hr/>
+eBay-Classifieds API documentation, specification version: 1.16
+
+<script type="text/javascript">
+
+    // all textareas with class 'xml' should be formatted nicely
+    textareas = $('textarea.xml');
+
+    for (i = 0; i < textareas.length; i++) {
+
+        var lines = textareas[i].value.split("\n").length;
+        // we dynamically calculate the textbox area height to avoid uneccessary frontend configuration 
+        var textboxHeight = lines * 18 + "px";
+
+        // todo: we are assigning all textareas the same editor variable, check whether this has bad side-effects
+        var editor = CodeMirror.fromTextArea(textareas[i], {
+            height: textboxHeight,
+            width: "1000px",
+            parserfile: "parsexml.js",
+            stylesheet: "../css/xmlcolors.css",
+            path: "../js/",
+            continuousScanning: 500,
+            lineNumbers: true
+        });
+    }
+
+    
+
+    //adding <br/> to linebreaks in code section, so editing is easier
+    codes = $('p.code');
+    for (i = 0; i <codes.length; i++){
+        $(codes[i]).html($(codes[i]).text().replace(/\n/mg,'<br/>'));
+    }
+
+</script>
+
+
+</body>
+</html>
