@@ -32,10 +32,11 @@ requests.packages.urllib3.disable_warnings()
 
 
 class EbkClient:
-    H_EBAYK_CLIENT_APP = '13a6dde3-935d-4cd8-9992-db8a8c4b6c0f1456515662228'
-    H_EBAYK_CLIENT_VERSION = '5423'
-    H_EBAYK_CLIENT_TYPE = 'ebayk-android-app-6.9.3'
-    H_EBAYK_CLIENT_UA = 'Dalvik/2.1.0'
+    H_EBAYK_CLIENT_APP = '13a6dde3-935d-4cd8-9992-db8a8c4b6c0f1456515662229'
+    H_EBAYK_CLIENT_VERSION = '13.4.2'
+    H_EBAYK_CLIENT_TYPE = 'ebayk-android-app-13.4.2'
+    H_EBAYK_CLIENT_UA = 'Dalvik/2.2.0'
+    H_EBAYK_WENKSE_SESSION_ID = 'asd'
 
     URL_PREFIX = 'https://api.ebay-kleinanzeigen.de/api'
 
@@ -54,10 +55,18 @@ class EbkClient:
             'X-ECG-USER-AGENT': self.H_EBAYK_CLIENT_TYPE,
             'Authorization': 'Basic {}'.format(app_auth),
             'X-ECG-Authorization-User': user_auth,
+            'X-EBAYK-WENKSE-SESSION-ID': self.H_EBAYK_WENKSE_SESSION_ID,
             'User-Agent': self.H_EBAYK_CLIENT_UA,
         }
 
         self._session = requests.session()
+        self._session.headers.update(header)
+        
+        session_token = self._http_get('/users/login').headers.get('X-EBAYK-TOKEN')
+        user_auth_with_token = f'email="{user_username}",token="{session_token}"'
+        header.update({
+            'X-ECG-Authorization-User': user_auth_with_token,
+        })
         self._session.headers.update(header)
 
     def _validate_http_response(self, r):
