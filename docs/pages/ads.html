@@ -1,0 +1,552 @@
+<html>
+<head>
+    <script src="../js/codemirror.js" type="text/javascript"></script>
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<title>ecg common API documentation</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../webapp/css/docs.css"/>
+<style type="text/css">
+    .CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #eee;
+        text-align: right;
+        padding-right: .3em;
+        font-size: 10pt;
+        font-family: monospace;
+        padding-top: .4em;
+    }
+
+    .code {
+        background-color: #EEEEEE;
+    }
+
+</style>
+
+</head>
+
+<body style="padding: 20px;">
+
+
+
+<a href="home.html"><img src="../img/api-logo-middle.png" border="0"/></a><br/>
+eBay-Classifieds API documentation, specification version: 1.6 <br/><br/>
+
+    <!--todo change this to <div> style layout-->
+
+<a href="home.html">Home navigation</a>
+
+<h1>Page ads</h1>
+
+
+<hr/>
+<h1>Table of contents:</h1>
+
+Read use-cases:
+<ul>
+    <li><a href="#search-ad">Search Ads</a></li>
+    <li><a href="#view-ad">View-Ad</a></li>
+</ul>
+
+Write use-cases:
+<ul>
+    <li><a href="#write-ad">Post/Write Ad</a></li>
+    <li><a href="#confirm-ad">Confirmation Ad</a></li>
+</ul>
+
+<h1><a name="read">Read calls</a></h1>
+
+<h2><a name="search-ad">Search Ads</a></h2>
+
+<h3>Method/URL</h3>
+<p class="code">
+GET /ads?queryParam1=x&queryParam2=y
+</p>
+
+<h3>Search approach</h3>
+For searching ads you are passing parameters. The Classifieds ads domain has several parameter sets, which can be combined:
+<ol>
+    <li>Categories/Attributes: Ads are related to categories.</li>
+    <li>Locations: Ads are related to location-info like regions, addresses, zipcode.</li>
+    <li>Users: Ads belong to a user, wich are identified by id and/or email</li>
+    <li>Secondary parameters: Ads further have price, title/description, pictures etc. </li>
+    <li>Other parameters like sorting</li>
+    <li>Paging: Several paging parameters for the result-response.</li>
+</ol>
+
+<h4>Categories/Attributes</h4>
+Search parameters related to categories/attributes:
+<ul>
+    <li>categoryId: ads belonging to category-id (see also <a href="categories.html#category-tree">category-reference</a>).</li>
+    <li>attributes: search for ads containing attributes (see also <a href="categories.html#attributes">attributes-reference</a>)</li>
+</ul>
+
+Sample calls:
+<p class="code">
+# check how the category-tree looks like
+GET /categories
+
+# searching for all ads in a category (216 is assumed to be 'cars' category)
+GET /ads?categoryId=216
+
+# checkout what attributes exist for category 216
+GET /ads/search-metadata/216
+
+# search for ads with 'cars.make' attribute in category 'cars'
+GET /ads?categoryId=216&attr[cars.make]
+</p>
+
+<h4><a name="locations-search">Locations</a></h4>
+<ul>
+    <li>locationId: Ads related to locationId(see also <a href="locations.html">category-reference</a>)</li>
+    <li>latitude + longitude: Ads related to latitude/longitude coordinate.</li>
+    <li>zipcode: Ads referenced by the zipcode</li>
+    <li>address: Address String</li>
+    <li>distance: Ads related to locations which are location in the distance of the reference-location (therefore only works
+    in connection with locationId OR latitude/longitude tuple OR zipcode</li>
+    <li>distanceUnit: Unit for above distance value, e.g. kilometeres or miles (for supported distance units
+    see <a href="#search-metadata">search-metadata</a>).</li>
+</ul>
+
+Sample calls
+<p class="code">
+# search by location-id
+GET /ads?locationId=12
+
+# search by multiple location-ids (check on search-metadata whether this is supported)
+GET /ads?locationId=12,13
+
+# search by coordinates including distance of 50 kilometers
+GET /ads?latitude=12.42&longitude=-34.44&distance=50&distanceUnit=KM
+
+# search by zipcode
+GET /ads?zipcode=10245
+</p>
+
+
+<h4>Users</h4>
+<ul>
+    <li>email: Ads posted by specific users (identified by email address)</li>
+    <li>userIds: Ads posted by specific users (identified by user-id)</li>
+</ul>
+
+Sample calls
+<p class="code">
+# ads posted by user identfied by 'maldana@ebay.de'
+GET /ads?email=maldana@ebay.de
+
+# ads posted by several users (identified by id)
+GET /ads?userIds=12,32
+</p>
+
+
+<h4>Secondary parameters</h4>
+
+Price parameters:
+<ul>
+    <li>minPrice: Ads with passed minimum price boundary.</li>
+    <li>maxPrice: Ads with passed maximum price boundary.</li>
+    <li>priceCurrency: Currency of minPrice/maxPrice (for supported currencies see
+        <a href="#search-metadata">search-metadata</a>). Check platform impl for the default currency.</li>
+    <li>priceType: Ads with certain price-type, e.g. for free, give-away (for supported price-types see
+        <a href="#search-metadata">search-metadata</a>). </li>
+</ul>
+
+<a name="other-search">Other parameters</a>:
+<ul>
+    <li>q: Ads matching this freetext value. The semantics of search-scope (e.g. is title, description included in
+        freetext search) is up to the platform.</li>
+    <li>adType: Ads of offer or wanted type (for supported ad-types see
+    <a href="#search-metadata">search-metadata</a>)</li>
+    <li>adStatus: Ads with a certain state like active, deleted or review-mode (for supported ad-statuses
+        <a href="#search-metadata">search-metadata</a>)</li>
+    <li>excludeExternalSource: Ads NOT coming from a specific external-source. The external source is identified by
+        the partnerId</li>
+    <li>sortType: Sorting criteria (for supported sorting options refer to
+        <a href="#search-metadata">search-metadata</a>)</li>
+    <li>pictureRequired: Ads which contain at least one picture. For picture-centric integration use-cases the client often
+        only wants to have ads with pictures.</li>
+</ul>
+
+Sample calls
+<p class="code">
+# ads which are for free
+GET /ads?priceType=FREE
+    
+# freetext search ads matching term 'guitars', which cost between 100 and 200 EUR
+# using priceCurrency default (depending on platform)
+GET /ads?q=guitar&minPrice=100&maxPrice=200
+# using explicit priceCurrency
+GET /ads?q=guitar&minPrice=100&maxPrice=200&priceCurrency=EUR
+
+# ads which are active and are of type offer
+GET /ads?adStatus=ACTIVE&adType=OFFER
+
+# ads without ads coming from external source with id 1
+GET /ads?excludeExternalSource=1    
+
+</p>
+
+
+<h4><a name="paging">Paging parameters</a></h4>
+Limiting or addressing a certain page of the ads result list.
+<ul>
+    <li>page: Page number of ads. Beware that the first page is 0!! The default value is 0.</li>
+    <li>size: Size of a single page. Default value is 20. Beware that there is a max-limit of page-size, which is
+        up to the the platform implementation.</li>
+</ul>
+
+
+
+<h3>Paging Info + Links</h3>
+Besides returning the found ads-data, search result also gives back paging information:  
+<textarea class="xml">
+<ad:ads ...>
+...
+    <types:paging>
+
+        <!-- summary of number found items -->
+        <types:numFound>1449596</types:numFound>
+
+        <!-- paging links on API  -->
+        <types:link rel="self" href="http://manolo:8080/api/ads?page=1&size=20&_ver=1.4"/>
+        <types:link rel="previous" href="http://api.ebay-kleinanzeigen.de/api/ads?page=0&size=20&_ver=1.4"/>
+        <types:link rel="next" href="http://api.ebay-kleinanzeigen.de/api/ads?page=2&size=20&_ver=1.4"/>
+
+        <!-- link of corresponding search to the public website -->
+        <types:link rel="self-public-website" href="http://www.ebayclassifieds.com/ads/"/>
+
+    </types:paging>
+...
+</ad:ads>
+</textarea>
+
+<h3>Search summary</h3>
+So you are able to review search parameters you passed and which defaults are set, you can refer to the search summary.<br/>
+
+E.g. GET /ads?q=car&maxPrice=200 could give you:
+<textarea class="xml">
+<ad:ads>
+    ...
+    <ad:ads-search-options>
+        <ad:q>car</ad:q>
+        <ad:priceCurrency>EUR</ad:priceCurrency>
+        <ad:maxPrice>200</ad:maxPrice>
+        <ad:page>0</ad:page>
+        <ad:size>20</ad:size>
+    </ad:ads-search-options>
+</ad:ads>
+</textarea>
+
+<h3>Search validation</h3>
+There are two ways how search validation is handled in case your parameters contain problems:
+<ul>
+    <li>400 Bad Request response, with detail message. The response does NOT contain any ads.</li>
+    <li>Fallback search, there is a fallback done on the parameters and a search is executed and results are returned.
+        This makes the api-clients more robust against changes (e.g. a deleted category-id
+        wouldn't cause the search to break). Still the api-client should review the results from time to time
+        to adapt to changes and to avoid to execute "wrong" searches.</li>
+</ul>
+
+To know if validation problems occur and whether you get a 400 Bad Request or a fallback search is
+<a href="intro.html">decided on the platform implementation</a>.<br/>
+
+Sample payload for search fallback search
+
+<textarea class="xml">
+<ad:ads>
+    ...
+    <ad:ads-search-options>
+        <ad:page>0</ad:page>
+        <ad:size>20</ad:size>
+        <types:api-warnings>
+            <types:api-warning>
+                <types:message>'categoryIds': Unknown category-ids: 123123</types:message>
+                <types:recover-fallback>Unknown ids will be discarded</types:recover-fallback>
+            </types:api-warning>
+        </types:api-warnings>
+    </ad:ads-search-options>
+</ad:ads>
+</textarea>
+
+
+<h3>Search histograms</h3>
+Search histograms show you how many ads exist for a certain criteria. Histograms are supported for:
+<ul>
+    <li>Categories</li>
+</ul>
+
+Sample payload:
+<textarea class="xml">
+<ad:ads>
+    ...
+    <ad:ads-search-histograms>
+        <ad:ads-category-histogram>
+            <ad:ads-category id="210">352122</ad:ads-category>
+            <ad:ads-category id="231">5033</ad:ads-category>
+            <ad:ads-category id="17">120893</ad:ads-category>
+        </ad:ads-category-histogram>
+    </ad:ads-search-histograms>
+</ad:ads>
+</textarea>
+
+
+
+<h3><a name="search-metadata">Search metadata</a></h3>
+All above mentioned search parameters are a superset. Please refer to the platform search-metadata to check which search
+parameters are supported by platform implementation. Also look at <a href="common-metadata.html#search">common-search-metadata</a>
+
+Ads Search-metadata sample calls:
+<p class="code">
+# search metadata for all categories
+GET /ads/search-metadata
+
+# /ads/search-metadata/{categoryId} search metadata for a specific category (e.g. could include attribute information)
+GET /ads/search-metadata/216
+</p>
+
+Sample search-metadata, for the semantics please check <a href="common-metadata.html#search-metadata">Collections common-metadata</a>.
+Not that for better overview the payload is abbreviated:
+<textarea class="xml">
+<ad:ads-search-options supported-locales="en_US,de_DE" locale="en_US" version="1.5">
+    <ad:q type="STRING" search-style="eq" search-param="optional" deprecated="false" since="1.0"/>
+    ...
+    <ad:adType type="ENUM" search-style="eq" search-param="optional" deprecated="false" since="1.0">
+        <ad:supported-value localized-label="Offered_en">OFFERED</ad:supported-value>
+        <ad:supported-value localized-label="Wanted_en">WANTED</ad:supported-value>
+    </ad:adType>
+    ...
+    <ad:priceCurrency type="STRING" search-style="eq" search-param="optional" deprecated="false" since="1.0"/>
+    <ad:minPrice type="DECIMAL" search-style="eq" search-param="optional" deprecated="false" since="1.0"/>
+    <ad:maxPrice type="DECIMAL" search-style="eq" search-param="optional" deprecated="false" since="1.0"/>
+    ...
+    <ad:distance type="LONG" search-style="eq" search-param="optional" deprecated="false" since="1.0"/>
+    <ad:distanceUnit type="ENUM" search-style="eq" search-param="optional" deprecated="false" since="1.0">
+        <types:supported-value localized-label="km_en">KM</types:supported-value>
+        <types:supported-value localized-label="mi_en">MI</types:supported-value>
+    </ad:distanceUnit>
+    ...
+    <attr:attributes>
+        <attr:attribute localized-label="Gender" type="ENUM" search-response-included="supported" write="optional"
+                        read="supported" search-style="eq" search-param="optional" deprecated="false" since="1.0" name="pets.gender">
+            <attr:supported-value localized-label="Female">Female</attr:supported-value>
+            <attr:supported-value localized-label="Male">Male</attr:supported-value>
+        </attr:attribute>
+    </attr:attributes>
+    ...
+    <ad:excludeExternalSource search-style="eq" search-param="optional" deprecated="false" since="1.0"/>
+    ...
+    <ad:sortType type="ENUM" search-style="eq" search-param="optional" deprecated="false" since="1.5">
+        <types:supported-value localized-label="Date_en">DATE_DESCENDING</types:supported-value>
+        <types:supported-value localized-label="Price_Ascending_en">PRICE_ASCENDING</types:supported-value>
+        <types:supported-value localized-label="Price_Descending_en">PRICE_DESCENDING</types:supported-value>
+        <types:supported-value localized-label="Distance_Ascending_en">DISTANCE_ASCENDING</types:supported-value>
+    </ad:sortType>
+
+    <ad:userIds search-style="in" search-param="optional" deprecated="false" since="1.5"/>
+</ad:ads-search-options>
+</textarea>
+
+
+<h3>Additional notes</h3>
+For partners/api-users there is a dedicated area where searching is narrowed down to the ads or users exclusively
+related to the partner/api-user. For more details look <a href="partners.html">Partners resource</a>.
+
+
+<h2><a name="view-ad">View-Ad</a></h2>
+
+<h3>Method/URL</h3>
+GET /ads/{adId}
+
+<h3>Sample payload</h3>
+Note: xml namespace declarations in root tag are omitted.
+                                            
+<textarea class="xml">
+<ad:ad ... id="1000">
+    <ad:ad-type>
+        <ad:value>OFFERED</ad:value>
+    </ad:ad-type>
+    <ad:title>title - 1000</ad:title>
+    <ad:description>description - 1000</ad:description>
+    <ad:imprint>imprint</ad:imprint>
+    <ad:ad-address>
+        <types:full-address>2145 Hamilton Ave, San Jose, CA 95125, US</types:full-address>
+        <types:street>2145 Hamilton Ave</types:street>
+        <types:city>San Jose</types:city>
+        <types:state>CA</types:state>
+        <types:zip-code>95125</types:zip-code>
+        <types:country>US</types:country>
+        <types:longitude>-122.084145</types:longitude>
+        <types:latitude>37.42197</types:latitude>
+    </ad:ad-address>
+    <ad:ad-status>
+        <ad:value>ACTIVE</ad:value>
+    </ad:ad-status>
+    <ad:user-id>1000</ad:user-id>
+    <ad:poster-ip-address>127.0.0.1</ad:poster-ip-address>
+    <ad:poster-machine-id>AAAAE0XHuwGSXAAAAIJZa65Xd</ad:poster-machine-id>
+    <ad:ad-source-id>POLARIS_WEB</ad:ad-source-id>
+    <ad:ad-external-reference-id>1001000</ad:ad-external-reference-id>
+    <ad:view-ad-count>24</ad:view-ad-count>
+    <ad:prohibited-flag-count>0</ad:prohibited-flag-count>
+    <ad:spam-flag-count>0</ad:spam-flag-count>
+    <ad:miscategorized-flag-count>0</ad:miscategorized-flag-count>
+    <ad:creation-date-time>2010-06-06T12:10:42.372+02:00</ad:creation-date-time>
+    <ad:modification-date-time>2010-06-11T12:45:42.372+02:00</ad:modification-date-time>
+    <ad:start-date-time>2010-06-06T12:45:42.372+02:00</ad:start-date-time>
+    <ad:end-date-time/>
+    <cat:category id="100012">
+        <cat:id-name>antiques</cat:id-name>
+        <cat:localized-name>Antiques</cat:localized-name>
+    </cat:category>
+    <loc:locations>
+        <loc:location id="2600045">
+            <loc:id-name>southbay</loc:id-name>
+            <loc:localized-name>South Bay</loc:localized-name>
+            <loc:longitude>-121.8939</loc:longitude>
+            <loc:latitude>37.3394</loc:latitude>
+            <loc:regions localized-label="State">
+                <loc:region>
+                    <loc:id-name>CA</loc:id-name>
+                    <loc:localized-name>California</loc:localized-name>
+                </loc:region>
+            </loc:regions>
+        </loc:location>
+    </loc:locations>
+    <attr:attributes/>
+    <ad:link rel="self" href="http://manolo:8080/ecg-api-web-server/ads/1000"/>
+    <ad:link rel="self-public-website" href="http://www.ebayclassifieds.com/classifieds/1000"/>
+    <pic:pictures>
+        <pic:picture>
+            <pic:link rel="300x200"
+                      href="http://img1.classistatic.com/cps/bln/100110/133r1/2866l5m_23.jpeg?set_id=2C4000"/>
+            <pic:link rel="500x100"
+                      href="http://img1.classistatic.com/cps/bln/100110/133r1/2866l5m_21.jpeg?set_id=2C4000"/>
+        </pic:picture>
+    </pic:pictures>
+    <ad:phone>1-800-555-1000</ad:phone>
+    <ad:user-external-reference-id/>
+</ad:ad></textarea>
+
+To know which fields are visible/supported, please refer to <a href="common-metadata.html#read-single">Read metadata</a>
+
+
+<h3>View-Ad hypermedia/links</h3>
+
+Self-reference and link to the view-ad of the public website:
+<textarea class="xml">
+<ad:ad ...>
+...
+    <ad:link rel="self" href="http://manolo:8080/ecg-api-web-server/ads/1000"/>
+    <ad:link rel="self-public-website" href="http://www.ebayclassifieds.com/classifieds/1000"/>
+...
+</ad:ad>
+</textarea>
+
+Picture links:
+<textarea class="xml">
+<ad:ad ...>
+...
+    <pic:pictures>
+        <pic:picture>
+            <pic:link rel="300x200"
+                  href="http://img1.classistatic.com/cps/bln/100110/133r1/2866l5m_23.jpeg?set_id=2C4000"/>
+            <pic:link rel="500x100"
+                  href="http://img1.classistatic.com/cps/bln/100110/133r1/2866l5m_21.jpeg?set_id=2C4000"/>
+        </pic:picture>
+    </pic:pictures>
+...
+</ad:ad>
+</textarea>
+
+
+
+<h1><a name="write">Write calls</a></h1>
+
+<h2><a name="write-ad">Post/Write Ad</a></h2>
+
+TODO: explain
+
+<br/>
+
+To know which fields are required or supported, please refer to <a href="common-metadata.html#write-single">Write metadata</a>
+
+<h2><a name="confirm-ad">Ad confirmation</a></h2>
+
+For fraud reasons posted ads from untrusted partners need a confirmation.
+
+<h3>Method/URL</h3>
+PUT /ads/confirmation/{adId}
+
+Response Codes:
+<ul>
+    <li>200 OK: Confirmation successful.</li>
+    <li>400 Bad Request: 1) Either password or userId is wrong. 2) Wrong uuid (does not belong to ad).</li>
+</ul>
+
+<h3>Sample payloads</h3>
+
+There are 2 ways to confirm ad:
+<ol>
+    <li>Confirmation by password which belongs to a registered user. To check whether user is registered or not
+    refer to <a href="users.html#registered-check">users registered check</a>.</li>
+    <li>Confirmation by uuid which is related to ad</li>
+</ol>
+
+Sample for password/registered confirmation style:
+<textarea class="xml">
+<ad:confirmation xmlns:ad="http://www.ebayclassifiedsgroup.com/schema/ad/v1">
+    <ad:userId>123</ad:userId>
+    <ad:confirmation-password>foo</ad:confirmation-password>
+</ad:confirmation>
+</textarea>
+
+Payload for uuid confirmation style:
+<textarea class="xml">
+<ad:confirmation xmlns:ad="http://www.ebayclassifiedsgroup.com/schema/ad/v1">
+    <ad:confirmation-uuid>b7eb10d2-7e21-433e-ad0c-9243b71567f9</ad:confirmation-uuid>
+</ad:confirmation>
+</textarea>
+
+
+
+
+
+<hr/>
+eBay-Classifieds API documentation, specification version: 1.6
+
+<script type="text/javascript">
+
+    // all textareas with class 'xml' should be formatted nicely
+    textareas = $('textarea.xml');
+
+    for (i = 0; i < textareas.length; i++) {
+
+        var lines = textareas[i].value.split("\n").length;
+        // we dynamically calculate the textbox area height to avoid uneccessary frontend configuration 
+        var textboxHeight = lines * 18 + "px";
+
+        // todo: we are assigning all textareas the same editor variable, check whether this has bad side-effects
+        var editor = CodeMirror.fromTextArea(textareas[i], {
+            height: textboxHeight,
+            width: "1000px",
+            parserfile: "parsexml.js",
+            stylesheet: "../css/xmlcolors.css",
+            path: "../js/",
+            continuousScanning: 500,
+            lineNumbers: true
+        });
+    }
+
+    
+
+    //adding <br/> to linebreaks in code section, so editing is easier
+    codes = $('p.code');
+    for (i = 0; i <codes.length; i++){
+        $(codes[i]).html($(codes[i]).text().replace(/\n/mg,'<br/>'));
+    }
+
+</script>
+
+
+</body>
+</html>

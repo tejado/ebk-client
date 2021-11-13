@@ -1,0 +1,225 @@
+<html>
+<head>
+    <script src="../js/codemirror.js" type="text/javascript"></script>
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<title>ecg common API documentation</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../webapp/css/docs.css"/>
+<style type="text/css">
+    .CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #eee;
+        text-align: right;
+        padding-right: .3em;
+        font-size: 10pt;
+        font-family: monospace;
+        padding-top: .4em;
+    }
+
+    .code {
+        background-color: #EEEEEE;
+    }
+
+    table {
+        margin-top : 10px;
+        margin-bottom : 30px;
+    }
+
+</style>
+
+</head>
+
+<body style="padding: 20px;">
+
+
+
+<a href="home.html"><img src="../img/api-logo-middle.png" border="0"/></a><br/>
+eBay-Classifieds API documentation, specification version: 1.11 <br/><br/>
+
+    <!--todo change this to <div> style layout-->
+
+<a href="home.html">Home navigation</a>
+
+<h1>Page versioning</h1>
+
+
+<hr/>
+<h1>Overview</h1>
+
+Versioning is introduced to express several criterias:
+<ul>
+    <li>Feature set: Available resources (addressed by URLs) and operations (GET,DELETE,POST,PUT etc.)</li>
+    <li>Domain model: Available resource data to read and write (expressed through <a href="schemas.html">XML schema-definitions</a>).</li>
+    <li>Deprecated features: Resources and operations which were available earlier, but now are prohibited to be used.</li>
+    <li>Down-compatibility: Upgrade-impact on api-clients.</li>
+</ul>
+
+<h2>Meaning of down-compatibility</h2>
+The Down-compatibility term is bound to the question whether a server's version upgrade could cause an existing api-client to break.
+If an upgrade does not cause an api-client to break, then the upgrade is down-compatible.
+
+<h3>Down-compatible upgrades</h3>
+Following upgrades are down-compatible:
+<table border="1">
+    <tr>
+        <th>API-Change</th>
+        <th>Example</th>
+    </tr>
+    <tr>
+        <td>ADDING a top-level element to XSD (top-level elements are OPTIONAL by definition)</td>
+        <td>ad.xsd offers a new top-level element &lt;ads&gt;, which represents a collection.</td></tr>
+    <tr>
+        <td>ADDING an OPTIONAL nested element to XSD.</td>
+        <td>Inside ad.xsd &lt;ads-search-options&gt; now offers a new nested
+        'zipcode' to be able query ads by zipcode.</td>
+    </tr>
+    <tr>
+        <td>ADDING an OPTIONAL attribute definition to any element inside XSD.</td>
+        <td>types.xsd now defines an attribute 'default', so metadata can show default values, in case api-ctrent didn't submit any.</td>
+    </tr>
+    <tr>
+        <td>ADDING a resource (addressed by URL).</td>
+        <td>A new resource /users got added.</td>
+    </tr>
+    <tr>
+        <td>supporting NEW operation on a resource.</td>
+        <td>New users now can be added through POST /users.</td>
+    </tr>
+    <tr>
+        <td>Marking an element as DEPRECATED</td>
+        <td>Inside ad.xsd &lt;ads-search-options&gt; support of query parameter 'userId' has
+        been <a href="common-metadata.html#deprecated">deprecated</a>. Internally the server will still handle the parameter or fallback.</td>
+    </tr>
+</table>
+
+<h3>Non down-compatible upgrades</h3>
+Following upgrades are not down-compatible:
+
+<table border="1">
+    <tr>
+        <th>API-Change</th>
+        <th>Example</th>
+        <th>Impact on api-client</th>
+    </tr>
+    <tr>
+        <td>ADDING a MANDATORY nested element to XSD.</td>
+        <td>ad.xsd defines a mandatory &lt;user-id&gt; element.</td>
+        <td>Api-client does not pass parameter and api-server would deny the request</td>
+    </tr>
+    <tr>
+        <td>ADDING a MANDATORY attribute to an existing element inside XSD.</td>
+        <td>users.xsd &lt;user&gt; has a new mandatory attribute 'id'.</td>
+        <td>Api-clients request payload does not include this 'id' attribute and api-server would fail to process request.</td>
+    </tr>
+    <tr>
+        <td>REMOVING an OPTIONAL or MANDATORY element or attribute inside XSD (for avoidance <a href="common-metadata.html#deprecated">deprecate flags</a> exist).</td>
+        <td>Inside ad-2.0 &lt;ads-search-options&gt; support of query parameter 'userId' has been removed completely.</td>
+        <td>Api-ctrent would still include the element/attribute, but api-server wouldn't be aware of them. In some circumstances
+        the api-server could still work and just discard these values.</td>
+     </tr>
+    <tr>
+        <td>REMOVING a resource.</td>
+        <td>/users is removed.</td>
+        <td>api-client could use the resource and would break through '404 Not Found' response code.</td>
+    </tr>
+    <tr>
+        <td>REMOVING support of an operation.</td>
+        <td>Removed write support for /users (no PUT/POST/DELETE).</td>
+        <td>Api-client could have write a feature to that resource but then would break by a '404 Not Found' or '501 Not Implemented'.</td>
+    </tr>
+    <tr>
+        <td>CHANGE of resource + operation semantics.</td>
+        <td>Doing a POST on /ads would not create an user imptrctily behind the scenes any longer.</td>
+        <td>Api-client expectation that user is created automatically doesn't apply any longer. A necessary POST on /users
+        isn't done and therefore posting an ad fails.</td>
+    </tr>
+</table>
+
+
+<h1>Version numbering </h1>
+
+Versioning has 3 digits:
+<ol>
+    <li>D.x.x: Major versions imply non-compatible changes. Upgrading from a 1.x.x version to a 2.x.x could break an api-client
+        based on 1.x.x.</li>
+    <li>x.D.x: Minor versions imply compatible changes. Upgrading from 1.1.x to 1.6.x would not break an api-client.</li>
+    <li>x.x.D: Minor-minor version upgrades contain bug-fixes based on x.D.x version. It is invisible for api-clients and is for internal use only .</li>
+</ol>
+
+
+<h2><a name="xsd-version">XSD Versioning</a></h2>
+The available resource data for read/write is expressed through <a href="schemas.html">XML schema-definitions</a>. The versioning
+info is encoded in two items:
+<ul>
+    <li>Target-Namespace represents Major version.</li>
+    <li>'version' attribute inside root tag defines minor version.</li>
+</ul>
+
+XSD (example ad.xsd):
+<textarea class="xml">
+
+<xs:schema ...
+    <!-- Major version (targetNamespace): -->
+    targetNamespace="http://www.ebayclassifiedsgroup.com/schema/ad/v1"
+    <!-- Minor version: -->
+    version="1.1">
+    ...
+</xs:schema>
+</textarea>
+
+
+XML Instance (based on XSD) are the concrete resource representation documents. Example: 'GET /ads' is
+bound to ad.xsd. <br/><br/>
+
+The upgrades of minor versions inside XSDs are done through compatible changes, the visibilty of change is
+encoded inside the 'version' attribute:
+<textarea class="xml">
+<ad:ads ...
+    <!-- Major version (targetNamespace): -->
+    xmlns:ad="http://www.ebayclassifiedsgroup.com/schema/ad/v1"
+    <!-- Minor version: -->
+    version="1.3">
+    ....
+</ad:ads>
+
+</textarea>
+
+<hr/>
+eBay-Classifieds API documentation, specification version: 1.11
+
+<script type="text/javascript">
+
+    // all textareas with class 'xml' should be formatted nicely
+    textareas = $('textarea.xml');
+
+    for (i = 0; i < textareas.length; i++) {
+
+        var lines = textareas[i].value.split("\n").length;
+        // we dynamically calculate the textbox area height to avoid uneccessary frontend configuration 
+        var textboxHeight = lines * 18 + "px";
+
+        // todo: we are assigning all textareas the same editor variable, check whether this has bad side-effects
+        var editor = CodeMirror.fromTextArea(textareas[i], {
+            height: textboxHeight,
+            width: "1000px",
+            parserfile: "parsexml.js",
+            stylesheet: "../css/xmlcolors.css",
+            path: "../js/",
+            continuousScanning: 500,
+            lineNumbers: true
+        });
+    }
+
+    
+
+    //adding <br/> to linebreaks in code section, so editing is easier
+    codes = $('p.code');
+    for (i = 0; i <codes.length; i++){
+        $(codes[i]).html($(codes[i]).text().replace(/\n/mg,'<br/>'));
+    }
+
+</script>
+
+
+</body>
+</html>

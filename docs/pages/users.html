@@ -1,0 +1,223 @@
+<html>
+<head>
+    <script src="../js/codemirror.js" type="text/javascript"></script>
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<title>ecg common API documentation</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../webapp/css/docs.css"/>
+<style type="text/css">
+    .CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #eee;
+        text-align: right;
+        padding-right: .3em;
+        font-size: 10pt;
+        font-family: monospace;
+        padding-top: .4em;
+    }
+
+    .code {
+        background-color: #EEEEEE;
+    }
+
+    table {
+        margin-top : 10px;
+        margin-bottom : 30px;
+    }
+
+</style>
+
+</head>
+
+<body style="padding: 20px;">
+
+
+
+<a href="home.html"><img src="../img/api-logo-middle.png" border="0"/></a><br/>
+eBay-Classifieds API documentation, specification version: 1.8 <br/><br/>
+
+    <!--todo change this to <div> style layout-->
+
+<a href="home.html">Home navigation</a>
+
+<h1>Page users</h1>
+
+
+<hr/>
+<h1><a name="registered-check">Registered Users check</a></h1>
+In case you support <a href="ads.html#confirm-ad">confirmation through password</a> (which is reserved for registered users)
+you can check whether user is registered or not by api.
+
+
+<h2>Method/URL</h2>
+<p class="code">
+    GET /users/registered/{userId}
+</p>
+
+The userId is string based. It can represent an userId or an email. For security reasons the platform implementor
+can deny a call with email-address but then will give back a '404 Bad Request' response.
+
+<h2>Response codes</h2>
+<ul>
+    <li>200 OK: User is registered</li>
+    <li>400 Bad Request: The userId pattern is not supported (e.g. represents an email though only numeric more anonymous
+        userId is allowed).</li>
+    <li>404 Not Found: User is NOT registered</li>
+</ul>
+
+
+<h1><a name="ads">Users Ads</a></h1>
+Users ads (analogous to partners area) is a dedicated resource for users.
+<br/><br/> All calls to the resources need <a href="security.html#user-auth">User-authentication</a>!
+
+<br/><br/>
+Base resource is:
+<p class="code">
+# whereas idName can be numeric userId or email-address
+/users/{idName}/ads
+</p>
+
+There are also common response code patterns:
+<ul>
+    <li>401: User authentication not succesfull (user + secret not correct)</li>
+    <li>403: User is not allowed to operate on resource (e.g. Ad doesn't belong to User)</li>
+</ul>
+
+
+<h2>Read Single User Ad</h2>
+
+<h3>Method/URL</h3>
+<p class="code">
+GET /users/{idName}/ads/{adId}
+</p>
+
+<h3>Response codes</h3>
+<ul>
+    <li>200: Ad available (see payload)</li>
+    <li>404: Ad not found</li>
+</ul>
+
+
+<h2>Read User Ads</h2>
+
+The read result is analogous to <a href="ads.html#search-ad">Search-result</a> (but search-parameters aren't support like
+in normal search).
+
+<h3>Method/URL</h3>
+<p class="code">
+GET /users/{idName}/ads
+</p>
+
+This resource returns a collections of ads, therefore paging is included. Paging follows the same pattern as
+<a href="ads.html#paging">/ads search-paging</a>.
+
+<h3>Response codes</h3>
+<ul>
+    <li>200: Read Success</li>
+    <li>400: Validation error (see payload for details)</li>
+</ul>
+
+
+<h2>Create User Ad</h2>
+
+Write-payload is same as for <a href="ads.html#write-ad">/ads</a> resource.
+
+<h3>Method/URL</h3>
+<p class="code">
+POST /users/{idName}/ads
+</p>
+
+<h3>Response codes</h3>
+<ul>
+    <li>201: Creation success</li>
+    <li>400: Validation error (see payload for details)</li>
+</ul>
+
+<h2>Update User Ad</h2>
+
+Write-payload is same as for <a href="ads.html#write-ad">/ads</a> resource.
+
+<h3>Method/URL</h3>
+<p class="code">
+PUT /users/{idName}/ads/{adId}
+</p>
+
+<h3>Response codes</h3>
+<ul>
+    <li>200: Update successful</li>
+    <li>400: Validation error (see payload for details)</li>
+</ul>
+
+
+<h2>Delete User Ad</h2>
+
+<h3>Method/URL</h3>
+<p class="code">
+DELETE /users/{idName}/ads/{adId}
+</p>
+
+<h3>Response codes</h3>
+<ul>
+    <li>204: Deletion successful</li>
+    <li>400: Validation error (see payload for details)</li>
+</ul>
+
+
+<h2><a name="extend-ad">Extend User Ad</a></h2>
+Most Ads have a limited lifetime. This call forces a touch/increment of the expiration/end-date of Ad.
+
+<h3>Method/URL</h3>
+<p class="code">
+POST /users/{idName}/ads/extend/{adId}
+</p>
+
+Response Codes:
+<ul>
+    <li>204: Extend Ad successfull.</li>
+    <li>400: Extend Ad was not successfull (e.g. Ad does not exist)</li>
+</ul>
+
+
+
+
+
+
+<hr/>
+eBay-Classifieds API documentation, specification version: 1.8
+
+<script type="text/javascript">
+
+    // all textareas with class 'xml' should be formatted nicely
+    textareas = $('textarea.xml');
+
+    for (i = 0; i < textareas.length; i++) {
+
+        var lines = textareas[i].value.split("\n").length;
+        // we dynamically calculate the textbox area height to avoid uneccessary frontend configuration 
+        var textboxHeight = lines * 18 + "px";
+
+        // todo: we are assigning all textareas the same editor variable, check whether this has bad side-effects
+        var editor = CodeMirror.fromTextArea(textareas[i], {
+            height: textboxHeight,
+            width: "1000px",
+            parserfile: "parsexml.js",
+            stylesheet: "../css/xmlcolors.css",
+            path: "../js/",
+            continuousScanning: 500,
+            lineNumbers: true
+        });
+    }
+
+    
+
+    //adding <br/> to linebreaks in code section, so editing is easier
+    codes = $('p.code');
+    for (i = 0; i <codes.length; i++){
+        $(codes[i]).html($(codes[i]).text().replace(/\n/mg,'<br/>'));
+    }
+
+</script>
+
+
+</body>
+</html>

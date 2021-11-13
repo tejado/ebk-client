@@ -1,0 +1,146 @@
+<html>
+<head>
+    <script src="../js/codemirror.js" type="text/javascript"></script>
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<title>ecg common API documentation</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../webapp/css/docs.css"/>
+<style type="text/css">
+    .CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #eee;
+        text-align: right;
+        padding-right: .3em;
+        font-size: 10pt;
+        font-family: monospace;
+        padding-top: .4em;
+    }
+
+    .code {
+        background-color: #EEEEEE;
+    }
+
+    table {
+        margin-top : 10px;
+        margin-bottom : 30px;
+    }
+
+</style>
+
+</head>
+
+<body style="padding: 20px;">
+
+
+
+<a href="home.html"><img src="../img/api-logo-middle.png" border="0"/></a><br/>
+eBay-Classifieds API documentation, specification version: 1.16 <br/><br/>
+
+    <!--todo change this to <div> style layout-->
+
+<a href="home.html">Home navigation</a>
+
+<h1>Page intro</h1>
+
+
+<hr/>
+<h1>Concept/Introduction</h1>
+
+eBay-Classifieds Common api is a way to share api-functionality and design across different platform implementations. It approaches
+a technical interface for the classifieds domain in a
+<a href="http://en.wikipedia.org/wiki/Representational_State_Transfer" target="_blank">Restful style</a>. It can be seen as a common
+specification, which different platforms are implementing.
+
+
+<br/>
+FILL_WITH_ARCHITECTURE_PICTURE
+
+
+
+<h2>What is shared?</h2>
+<ul>
+    <li>Domain model: For details refer to <a href="schemas.html">schema-definitions</a></li>
+    <li>Metadata design</li>
+    <li>Resource structure: Which resources (addressed by URLs) and operations (HTTP operations) on them exist.</li>
+    <li>Response status codes and its semantics</li>
+    <li>Error/Validation handling</li>
+    <li>Security features</li>
+    <li>Caching features</li>
+</ul>
+
+<h2>Concrete implementations</h2>
+The concrete common-api platform implementations (see below) can decide to only implement a subset of the specification. So for all documented features
+please double check whether and how they are implemented (either by metadata or contacting the implementor).  
+
+<h3><a name="differences">Howto find out differences common-api and platform-impl</a></h3>
+Because this documentation tells about the superset of whole "possible" common-api documentation, you have to find out
+which features the platform-implemenation really implements. For that refer to:
+<ol>
+    <li>If the resource and operation (addressed by URL and HTTP method) gives back
+        <a href="response-codes.html#not-impl">501 Not Implemented</a> it is not supported.</li>
+    <li>In case the resource and operation is supported, there is more fine grained information about supported/unsupported
+        when accessing <a href="common-metadata.html#access">metadata resources </a>. The flags 'supported/unsupported' for
+        <a href="common-metadata.html#read-single" >single-read-resource</a>, <a href="common-metadata.html#write-single">write-single-resource</a>
+        and <a href="common-metadta.html#collection">collection-resource</a> will give you according information.</li>
+    <li>Try out some sample calls. Just by looking at payload you can already gain some information (e.g. defined resolution-sizes for /pictures).</li>
+    <li>If above doesn't suffice contact the platform implementor for more details (for email addresses
+        see below).</li>
+</ol>
+
+
+
+
+
+<h1><a name="contact">Contact</a></h1>
+
+<p>
+eBay-Classifieds Common-api (superset specification) <a href="mailto:ebay-classifieds-api@ebay.com">Contact</a>
+</p>
+
+<p>
+Contact platform implementations for general questions or partnership requests:
+<table border="1">
+    <tr><th>Platform</th><th>API-URL</th><th>Contact</th></tr>
+    <tr><td>eBay classifieds</td><td><a href="http://webapi.ebayclassifieds.com/webapi/" target="_blank">http://webapi.ebayclassifieds.com/webapi</a></td><td><a href="mailto:ebay-classifieds-api@ebay.com">E-Mail</a></td></tr>
+    <tr><td>eBay Kleinanzeigen</td><td><a href="http://api.ebay-kleinanzeigen.de/api/" target="_blank">http://api.ebay-kleinanzeigen.de/api/</a></td><td><a href="mailto:api@ebay-kleinanzeigen.de">E-Mail</a></td></tr>
+    <tr><td>eBay annunci</td><td>tbd</td><td><a href="">tbd</a></td></tr>
+</table>
+</p><hr/>
+eBay-Classifieds API documentation, specification version: 1.16
+
+<script type="text/javascript">
+
+    // all textareas with class 'xml' should be formatted nicely
+    textareas = $('textarea.xml');
+
+    for (i = 0; i < textareas.length; i++) {
+
+        var lines = textareas[i].value.split("\n").length;
+        // we dynamically calculate the textbox area height to avoid uneccessary frontend configuration 
+        var textboxHeight = lines * 18 + "px";
+
+        // todo: we are assigning all textareas the same editor variable, check whether this has bad side-effects
+        var editor = CodeMirror.fromTextArea(textareas[i], {
+            height: textboxHeight,
+            width: "1000px",
+            parserfile: "parsexml.js",
+            stylesheet: "../css/xmlcolors.css",
+            path: "../js/",
+            continuousScanning: 500,
+            lineNumbers: true
+        });
+    }
+
+    
+
+    //adding <br/> to linebreaks in code section, so editing is easier
+    codes = $('p.code');
+    for (i = 0; i <codes.length; i++){
+        $(codes[i]).html($(codes[i]).text().replace(/\n/mg,'<br/>'));
+    }
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,108 @@
+<html>
+<head>
+    <script src="../js/codemirror.js" type="text/javascript"></script>
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<title>ecg common API documentation</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../webapp/css/docs.css"/>
+<style type="text/css">
+    .CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #eee;
+        text-align: right;
+        padding-right: .3em;
+        font-size: 10pt;
+        font-family: monospace;
+        padding-top: .4em;
+    }
+
+    .code {
+        background-color: #EEEEEE;
+    }
+
+</style>
+
+</head>
+
+<body style="padding: 20px;">
+
+    <!--todo change this to <div> style layout-->
+<a href="home.html">Home navigation</a>
+
+<h1>Page schemas</h1>
+
+
+<hr/>
+<h1>Schemas = Domain-Model</h1>
+
+The domain model structure is shown by XML Schema (XSD) technology. Root directory of the schemas:
+<p class="code">
+GET /schemas
+</p>
+
+Further browsing happens by following the schemaLocation entries:
+<textarea class="xml">
+<xs:schema>
+    ...
+    <xs:import namespace="http://www.ebayclassifiedsgroup.com/schema/types/v1" schemaLocation="types-1.5.xsd"/>
+    ....
+</xs:schema>
+</textarea>
+
+Be aware that XSD is the reference data model, but can also let return
+
+<h1>Response formats</h1>
+XML and JSON are supported as response formats (XML is default). You can switch by appending the format identifier to resource:
+<p class="code">
+# return as XML (default)
+GET /ads
+# return as XML
+GET /ads.xml
+
+# return as json
+GET /ads.json
+</p>
+
+
+<h1>JAXB artifacts</h1>
+In case you want to base your api-client and building the model with JAXB, <a href="intro.html#contact">contact</a> platform implementors
+to provide you with the generated .jars (it could save you some xjc JAXB-generation nightmares).
+
+
+<hr/>
+<script type="text/javascript">
+
+    // all textareas with class 'xml' should be formatted nicely
+    textareas = $('textarea.xml');
+
+    for (i = 0; i < textareas.length; i++) {
+
+        var lines = textareas[i].value.split("\n").length;
+        // we dynamically calculate the textbox area height to avoid uneccessary frontend configuration 
+        var textboxHeight = lines * 18 + "px";
+
+        // todo: we are assigning all textareas the same editor variable, check whether this has bad side-effects
+        var editor = CodeMirror.fromTextArea(textareas[i], {
+            height: textboxHeight,
+            width: "1000px",
+            parserfile: "parsexml.js",
+            stylesheet: "../css/xmlcolors.css",
+            path: "../js/",
+            continuousScanning: 500,
+            lineNumbers: true
+        });
+    }
+
+    
+
+    //adding <br/> to linebreaks in code section, so editing is easier
+    codes = $('p.code');
+    for (i = 0; i <codes.length; i++){
+        $(codes[i]).html($(codes[i]).text().replace(/\n/mg,'<br/>'));
+    }
+
+</script>
+
+
+</body>
+</html>

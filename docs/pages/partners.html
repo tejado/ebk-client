@@ -1,0 +1,286 @@
+<html>
+<head>
+    <script src="../js/codemirror.js" type="text/javascript"></script>
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<title>ecg common API documentation</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../webapp/css/docs.css"/>
+<style type="text/css">
+    .CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #eee;
+        text-align: right;
+        padding-right: .3em;
+        font-size: 10pt;
+        font-family: monospace;
+        padding-top: .4em;
+    }
+
+    .code {
+        background-color: #EEEEEE;
+    }
+
+</style>
+
+</head>
+
+<body style="padding: 20px;">
+
+
+
+<a href="home.html"><img src="../img/api-logo-middle.png" border="0"/></a><br/>
+eBay-Classifieds API documentation, specification version: 1.6 <br/><br/>
+
+    <!--todo change this to <div> style layout-->
+
+<a href="home.html">Home navigation</a>
+
+<h1>Page partners</h1>
+
+
+<hr/>
+Partners resource is a dedicated "area" for api-clients. The respective partner is identified by the api-username inside URL.
+It matches the ones used for the Authentication credentials of <a href="security.html#authentication">HTTP digest</a>.
+<p class="code">
+# general URL pattern
+/partners/{api-username}
+
+# if HTTP digest username is 'foo' the starting URL-snippet would always be:
+/partners/foo
+</p>
+
+
+<h1>Partners ads</h1>
+The overall advantage of using the partners ads resource is, that you save effort in id-mapping. In traditional integrations
+often there is the need for the client to have a mapping of its own and the target-platform id. This is no longer required
+due to the internal id-resolution of the partners resource.
+
+<br/><br/>
+TODO: place a picture here
+
+<br/><br/>
+
+For partners ads there are special fields:
+<ul>
+    <li><b>source-id</b>: numeric representation of the api-user (is directly related to the api-username).</li>
+    <li><b>ad-external-reference-id</b>: ad-id on the partner side. Can be initialized if a partner is posting a
+        homegrown ad to the api, which now has to ids: the ad-id from the partner's point of view and the ad-id of the
+        platform-impl of the api.</li>
+    <li><b>user-external-reference-id</b>: user-id which is related to the partner (and not the native platform impl
+        user-id of the ad).</li>
+</ul>
+
+Be aware that above dedicated external partner fields could be initialized internally but for searching/viewing
+could be set to invisible by the <a href="intro.html#differences">platform implementor</a>.
+
+
+<h2><a name="ads">Search ads</a></h2>
+
+<h3>Method/URL</h3>
+
+<p class="code">
+GET /partners/{api-username}/ads
+</p>
+
+<h3>Semantic changes</h3>
+
+The search of ads behave the same as the normal <a href="ads.html#search-ad">ads-search</a>, but there are following semantic
+changes:
+<ul>
+   <li>The userIds search parameter represents the userIds which are related to the partner (it now has the semantic of
+       the <b>user-external-reference-id</b>).</li>
+   <li>The returned ads are all somehow related to the partner. Either there is a relation to the userId (represented
+       in resource as <b>user-external-reference-id</b>) or the ad is coming from the partner (see <b>ad-external-reference-id</b>).</li>
+</ul>
+
+Example userIds:
+<textarea class="xml">
+Request:
+GET /partners/foo/ads?userIds=321,12
+
+Response payload:
+<ad:ads ...>
+    ...
+    <ad:ad id="4323">
+        ...
+        <!-- userId still the native userId from the platform like normal /ads search -->
+        <ad:userId>55</ad:userId>
+        <!-- ad which includes the queried userIds -->
+        <ad:user-external-reference-id>12</ad:user-external-reference-id>
+    </ad:ad>
+    ...    
+</ad:ads>
+
+</textarea>
+
+Example normal ads search (which would include only respective partner-ads):
+<textarea class="xml">
+Request:
+GET /partners/foo/ads
+
+Response payload:
+<ad:ads ...>
+    ...
+    <!-- ad-id on the platform-impl side -->
+    <ad:ad id="4323">
+        ...
+        <!-- id, which is the ad-id on partners side -->
+        <ad:ad-external-reference-id>34212</ad:ad-external-reference-id>
+        <!-- id which is numeric id for {api-username}, in this case 'foo' -->
+        <ad:ad-source-id>2</ad:ad-source-id>
+    </ad:ad>
+    ...
+</ad:ads>
+</textarea>
+
+<h2>View Ad</h2>
+
+<h3>Method/URL</h3>
+
+<p class="code">
+GET /partners/{api-username}/ads/{ad-external-reference-id}
+</p>
+
+<h3>Semantic changes</h3>
+
+The semantics are the same as <a href="ads.html#view-ad">View Ad</a>, but the id has the value of <b>ad-source-id</b>:
+
+<textarea class="xml">
+Request:
+GET /partners/foo/ads/324
+
+Response payload:
+<!-- ad-id on the platform-impl side -->
+<ad:ad id="4323">
+    ...
+    <!-- id, which is the ad-id on partners side -->
+    <ad:ad-external-reference-id>342</ad:ad-external-reference-id>
+    <!-- id which is numeric id for {api-username}, in this case 'foo' -->
+    <ad:ad-source-id>2</ad:ad-source-id>
+</ad:ad>
+
+</textarea>
+
+
+<h2>Post/Create Ad</h2>
+<h3>Method/URL</h3>
+<p class="code">
+PUT /partners/{api-username}/ads/{ad-external-reference-id}
+
+Response codes:
+201: Created, successfull Ad-creation (including ad-resource payload, which got updated)
+400: Ad creation failed due to validation failures (for details see error-message payload)     
+</p>
+
+In case the Ad related to the username and ad-external-reference-id does not exist yet, the PUT is interpreted
+as a creation of an Ad.
+<br/><br/>
+The other write semantics are the same as the normal <a href="ads.html#write-ad">Write Ad Actions</a>.
+
+
+<h2>Update Ad</h2>
+<h3>Method/URL</h3>
+<p class="code">
+PUT /partners/{api-username}/ads/{ad-external-reference-id}
+
+Response codes:
+200: Successfull update (including ad-resource payload, which got updated)
+400: Ad creation failed due to validation failures (for details see error-message payload)
+</p>
+
+In case the Ad related to the username and ad-external-reference-id exists already, the PUT is interpreted
+as an update of a the Ad.
+
+<br/><br/>
+The other write semantics are the same as the normal <a href="ads.html#write-ad">Write Ad Actions</a>.
+
+
+<h2>Delete Ad</h2>
+<h3>Method/URL</h3>
+<p class="code">
+DELETE /partners/{api-username}/ads/{ad-external-reference-id}
+
+Response codes:
+204: Successfull deletion
+400: Ad related to username and ad-external-reference-id does not exist
+</p>
+
+<br/><br/>
+The other write semantics are the same as the normal <a href="ads.html#write-ad">Write Ad Actions</a>.
+
+
+<h1><a name="users">Partners users</a></h1>
+
+For partners users info, there are dedicated fields:
+<ul>
+<li><b>user-external-reference-id</b>: user-id which is related to the partner (and not the native platform impl
+        user-id of the ad).</li>
+</ul>
+
+<h2>Read Single User</h2>
+
+<h3>Method/URL</h3>
+
+<p class="code">
+GET /partners/{api-username}/users/{user-external-reference-id}
+</p>
+
+<h3>Semantic changes</h3>
+The user lookup is not done by the platform-impl user-id but on the user-id of the partner:
+<textarea class="xml">
+Request:
+GET /partners/foo/ads/324
+
+Response payload:
+<!-- user-id on the platform-impl side -->
+<user:user id="1">
+    ...
+    <!-- user which is somehow related to the partner and is identified by this id -->
+    <user:user-external-reference-id>342</user:user-external-reference-id>
+</user:user>
+
+</textarea>
+
+
+
+
+
+<hr/>
+eBay-Classifieds API documentation, specification version: 1.6
+
+<script type="text/javascript">
+
+    // all textareas with class 'xml' should be formatted nicely
+    textareas = $('textarea.xml');
+
+    for (i = 0; i < textareas.length; i++) {
+
+        var lines = textareas[i].value.split("\n").length;
+        // we dynamically calculate the textbox area height to avoid uneccessary frontend configuration 
+        var textboxHeight = lines * 18 + "px";
+
+        // todo: we are assigning all textareas the same editor variable, check whether this has bad side-effects
+        var editor = CodeMirror.fromTextArea(textareas[i], {
+            height: textboxHeight,
+            width: "1000px",
+            parserfile: "parsexml.js",
+            stylesheet: "../css/xmlcolors.css",
+            path: "../js/",
+            continuousScanning: 500,
+            lineNumbers: true
+        });
+    }
+
+    
+
+    //adding <br/> to linebreaks in code section, so editing is easier
+    codes = $('p.code');
+    for (i = 0; i <codes.length; i++){
+        $(codes[i]).html($(codes[i]).text().replace(/\n/mg,'<br/>'));
+    }
+
+</script>
+
+
+</body>
+</html>

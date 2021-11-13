@@ -1,0 +1,120 @@
+<html>
+<head>
+    <script src="../js/codemirror.js" type="text/javascript"></script>
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<title>ecg common API documentation</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../webapp/css/docs.css"/>
+<style type="text/css">
+    .CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #eee;
+        text-align: right;
+        padding-right: .3em;
+        font-size: 10pt;
+        font-family: monospace;
+        padding-top: .4em;
+    }
+
+    .code {
+        background-color: #EEEEEE;
+    }
+
+    table {
+        margin-top : 10px;
+        margin-bottom : 30px;
+    }
+
+</style>
+
+</head>
+
+<body style="padding: 20px;">
+
+
+
+<a href="home.html"><img src="../img/api-logo-middle.png" border="0"/></a><br/>
+eBay-Classifieds API documentation, specification version: 1.16 <br/><br/>
+
+    <!--todo change this to <div> style layout-->
+
+<a href="home.html">Home navigation</a>
+
+<h1>Page counters</h1>
+
+
+<hr/>
+<h1>Counters</h1>
+
+<h2>Read Counter VIP</h2>
+
+<h3>Method/URL</h3>
+<p class="code">
+GET /counters/ads/vip/{adId}
+</p>
+
+<h3>Return payload</h3>
+
+<textarea class="xml">
+<counter>
+    <adId>1235323</adId>
+    <type>VIP</type>
+    <value>123</value>
+</counter>
+</textarea>
+
+
+<h2>Increment Counter VIP</h2>
+
+<h3>Method/URL</h3>
+
+<p class="code">
+PUT /counters/ads/vip/{adId}
+</p>
+
+Expected response codes:
+<ul>
+    <li>200 OK: Increment Success</li>
+    <li>404 Not Found: Ad not found (couldn't increment counter)</li>
+</ul>
+
+To avoid another network-call roundtrip the effective counter-result is also returned
+(equivalent to 'Read Counter VIP').<hr/>
+eBay-Classifieds API documentation, specification version: 1.16
+
+<script type="text/javascript">
+
+    // all textareas with class 'xml' should be formatted nicely
+    textareas = $('textarea.xml');
+
+    for (i = 0; i < textareas.length; i++) {
+
+        var lines = textareas[i].value.split("\n").length;
+        // we dynamically calculate the textbox area height to avoid uneccessary frontend configuration 
+        var textboxHeight = lines * 18 + "px";
+
+        // todo: we are assigning all textareas the same editor variable, check whether this has bad side-effects
+        var editor = CodeMirror.fromTextArea(textareas[i], {
+            height: textboxHeight,
+            width: "1000px",
+            parserfile: "parsexml.js",
+            stylesheet: "../css/xmlcolors.css",
+            path: "../js/",
+            continuousScanning: 500,
+            lineNumbers: true
+        });
+    }
+
+    
+
+    //adding <br/> to linebreaks in code section, so editing is easier
+    codes = $('p.code');
+    for (i = 0; i <codes.length; i++){
+        $(codes[i]).html($(codes[i]).text().replace(/\n/mg,'<br/>'));
+    }
+
+</script>
+
+
+</body>
+</html>

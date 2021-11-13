@@ -1,0 +1,356 @@
+<html>
+<head>
+    <script src="../js/codemirror.js" type="text/javascript"></script>
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<title>ecg common API documentation</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../../webapp/css/docs.css"/>
+<style type="text/css">
+    .CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #eee;
+        text-align: right;
+        padding-right: .3em;
+        font-size: 10pt;
+        font-family: monospace;
+        padding-top: .4em;
+    }
+
+    .code {
+        background-color: #EEEEEE;
+    }
+
+</style>
+
+</head>
+
+<body style="padding: 20px;">
+
+    <!--todo change this to <div> style layout-->
+<a href="home.html">Home navigation</a>
+
+<h1>Page response-codes</h1>
+
+
+<hr/>
+<h1>Response Codes
+    Overview</h1>
+API is designed to encode response information as HTTP codes.
+
+
+<table border="1">
+    <tr><th>Code</th><th>Meaning</th><th>Usages/details</th></tr>
+    <tr><td>200</td><td>OK</td><td>Successful response, data included in payload.</td></tr>
+    <tr><td>201</td><td>Created</td><td>Successful creation of resource. </td></tr>
+    <tr><td>204</td><td>No Content</td><td>Successful request, no response payload included.</td></tr>
+    <tr><td>400</td><td>Bad Request</td><td>Validation error. For details look inside api-base-error XML</td></tr>
+    <tr><td>401</td><td>Unauthorized</td><td>Unauthorized access of resource. Most likely wrong username/password through HTTP digest was provided.</td></tr>
+    <tr><td>403</td><td>Forbidden</td><td>Authentication was successful, but the resource + method is not allowed to access generally or rate-limit has met.</td></tr>
+    <tr><td>404</td><td>Not Found</td><td>Resource is not available, cannot be found (e.g. unknown ad-id). For detailfs refer to the response payload.</td></tr>
+    <tr><td>500</td><td>Internal Server Error</td><td>Internal server error. Refer to the details inside api-base-error XML and notify developers.</td></tr>
+    <tr><td>501</td><td>Not Implemented</td><td>All resources are common-api superset. This response shows that the platform has not implemented the method/resource.</td></tr>
+</table>
+
+
+<h2>Successful Response Samples</h2>
+
+<h3>201 Created</h3>
+<textarea class="xml">
+Headers:
+HTTP/1.1 201 Created
+Server: Apache-Coyote/1.1
+Location: http://www.kijiji.com.staging.qapolaris.com/polaris-web-ecg-api/ads/316323
+ETag: "09a2a4ca1a01d6c05d967e6dd9d6e5d13"todo: copy from mpwiki
+Content-Type: application/xml;charset=UTF-8
+Content-Language: en-US
+Content-Length: 5187todo: copy from mpwiki
+Date: Wed, 03 Mar 2010 21:51:05 GMT
+
+
+XML (sample after POST/PUT ad):
+<ad:ad xmlns:ad="http://www.ebayclassifiedsgroup.com/schema/ad/v1">
+    ...
+    <ad:title>Title of posted ad</ad:title>
+    ...
+</ad:ad>
+</textarea>
+
+<h3>204 No Content</h3>
+
+<textarea class="xml">
+Headers:
+HTTP/1.1 204 No Content
+Server: Apache-Coyote/1.1
+Etag: "0d41d8cd98f00b204e9800998ecf8427e"
+Date: Sat, 06 Mar 2010 02:22:18 GMT
+
+No XML payload
+</textarea>
+
+
+<h2>Error Response Samples</h2>
+
+<h3>400 Bad Request (with field details)</h3>
+<textarea class="xml">
+Headers:
+HTTP/1.1 400 Bad Request
+Server: Apache-Coyote/1.1
+ETag: "0a0a142eb4ef64ef49365dcadf5d83f33"
+Content-Type: application/xml;charset=UTF-8
+Content-Length: 446
+Date: Wed, 03 Mar 2010 21:55:34 GMT
+
+XML:
+<api-base-error xmlns="http://www.ebayclassifiedsgroup.com/schema/types/v1"
+    http-status-code="400">
+    <api-errors>
+        <api-error>
+            <message>title</message>
+        </api-error>
+    </api-errors>
+    <api-field-errors>
+        <api-field-error>
+            <field-xpath>/ad/title</field-xpath>
+            <api-errors>
+                <api-error>
+                    <message>Please enter a longer title.</message>
+                </api-error>
+            </api-errors>
+        </api-field-error>
+    </api-field-errors>
+</api-base-error>
+</textarea>
+
+<h3>400 Bad Request (general error)</h3>
+<textarea class="xml">
+Headers:
+HTTP/1.1 400 Bad Request
+Server: Apache-Coyote/1.1
+ETag: "0a0a142eb4ef64ef49365dcadf5d83f33"
+Content-Type: application/xml;charset=UTF-8
+Content-Length: 446
+Date: Wed, 03 Mar 2010 21:55:34 GMT
+
+XML:
+<api-base-error xmlns="http://www.ebayclassifiedsgroup.com/schema/types/v1"
+                http-status-code="400">
+    <api-errors>
+        <api-error>
+            <message>Cannot unmarshal content</message>
+        </api-error>
+        <api-error>
+            <message>javax.xml.bind.UnmarshalException
+                - with linked exception:
+                [org.xml.sax.SAXParseException: The prefix &quot;ad1&quot; for element &quot;ad1:ad&quot; is not
+                ... 62 more
+            </message>
+        </api-error>
+    </api-errors>
+    <api-field-errors/>
+</api-base-error>
+</textarea>
+
+<h3><a name="401">401 Unauthorized</a></h3>
+
+<textarea class="xml">
+Headers:
+HTTP/1.1 401 Unauthorized
+Server: Apache-Coyote/1.1
+Pragma: No-cache
+Cache-Control: no-cache
+Expires: Wed, 31 Dec 1969 16:00:00 PST
+WWW-Authenticate: Digest realm="polaris-web-ecg-api-implementation", qop="auth", nonce="680e11386d120136fead0409faa0d66a", opaque="634fcf3f131864637182cb82d27f730e"
+Content-Type: text/html;charset=utf-8
+Content-Length: 954
+Date: Wed, 03 Mar 2010 22:21:02 GMT
+
+No XML payload
+</textarea>
+
+<h3><a name="403-rate">403 Forbidden (Reason: rate limit reached)</a></h3>
+<textarea class="xml">
+Headers
+HTTP/1.1 403 Forbidden
+Server: Apache-Coyote/1.1
+Etag: "09ff8b25be758aaf4a6677d2e7641387e"
+Content-Type: application/xml
+Content-Length: 450
+Date: Wed, 03 Mar 2010 22:43:50 GMT
+
+
+XML-Payload:
+<rate-limit xmlns="http://www.ebayclassifiedsgroup.com/schema/rate" http-status-code="403">
+  <status>LIMIT_EXCEEDED</status>
+  <request-type>ALL_OTHER</request-type>
+  <limit-type>HOURLY</limit-type>
+  <used-limit>10</used-limit>
+  <remaining-limit>0</remaining-limit>
+  <start-date-time>2010-03-03T14:00:00.000-08:00</start-date-time>
+  <reset-date-time>2010-03-03T15:00:00.000-08:00</reset-date-time>
+</rate-limit>
+</textarea>
+
+<h3><a name="403-resource">403 Forbidden (Reason: restricted resource)</a></h3>
+<textarea class="xml">
+Headers
+HTTP/1.1 403 Forbidden
+Date: Tue, 29 Jun 2010 14:47:16 GMT
+Server: Apache
+Content-Length: 1108
+Vary: Accept-Encoding
+Content-Type: text/html;charset=utf-8
+
+Payload (tomcat generated):
+HTTP Status 403 - Access to the requested resource has been denied. Access to the specified resource (Access
+to the requested resource has been denied) has been forbidden.
+</textarea>
+
+
+<h3>404 Not Found (Unknown resource path)</h3>
+<textarea class="xml">
+Headers:
+HTTP/1.1 404 Not Found
+Server: Apache-Coyote/1.1
+Pragma: No-cache
+Cache-Control: no-cache
+Etag: "0fb9ebeb8cd2d72d175ee0cca0cfe4a03"
+Content-Type: application/xml;charset=UTF-8
+Content-Length: 7302
+Date: Wed, 03 Mar 2010 23:34:38 GMT
+
+XML-Payload:
+<api-base-error http-status-code="404">
+  <api-errors>
+    <api-error>
+      <message>Ad identified by id 3158870 not found</message>
+    </api-error>
+    <api-error>
+      <message>
+        javax.persistence.NoResultException
+      at com.ebay.polaris.ad.repository.AdRepositoryJPA.findAdById(AdRepositoryJPA.java:118)
+      at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+      at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+      </message>
+    </api-error>
+  </api-errors>
+  <api-field-errors/>
+</api-base-error>
+
+</textarea>
+
+<h3>404 Not Found (Invalid path)</h3>
+For example /ads/unknownPathResource:
+<textarea class="xml">
+Headers:
+HTTP/1.1 404 Not Found
+Server: Apache-Coyote/1.1
+Pragma: No-cache
+Cache-Control: no-cache
+Expires: Wed, 31 Dec 1969 16:00:00 PST
+Content-Type: text/html;charset=utf-8
+Content-Length: 952
+Date: Wed, 03 Mar 2010 23:38:24 GMT
+
+Payload (tomcat generated 404 page):
+HTTP Status 404 -
+type Status report
+message
+description The requested resource () is not available.
+Apache Tomcat/6.0.20
+</textarea>
+
+
+<h3>500 (Internal Server Error)</h3>
+<textarea class="xml">
+Headers:
+HTTP/1.1 500 Internal Server Error
+Server: Apache-Coyote/1.1
+ETag: "0830dc9330e70cae42dd099b4d20266f8"
+Content-Type: application/xml;charset=UTF-8
+Content-Length: 5389
+Date: Tue, 29 Jun 2010 13:10:37 GMT
+
+XML-Payload:
+<api-base-error http-status-code="500">
+    <api-errors>
+        <api-error>
+            <message>
+                Failed to convert value of type 'java.lang.String' to required type 'long'; nested exception is
+                java.lang.NumberFormatException: For input string: "315887A"
+            </message>
+        </api-error>
+        <api-error>
+            <message>
+                org.springframework.beans.TypeMismatchException: Failed to convert value of type 'java.lang.String'
+                to required type 'long'; nested exception is java.lang.NumberFormatException: For input string:
+                "315887A"
+                at org.springframework.beans.SimpleTypeConverter.convertIfNecessary(SimpleTypeConverter.java:50)
+            </message>
+        </api-error>
+    </api-errors>
+    <api-field-errors/>
+</api-base-error>
+</textarea>
+
+
+<h3>501 Not Implemented</h3>
+<textarea class="xml">
+Headers:
+HTTP/1.1 501 Not Implemented
+Server: Apache-Coyote/1.1
+Pragma: No-cache
+Cache-Control: no-cache
+Expires: Wed, 31 Dec 1969 16:00:00 PST
+ETag: "08572d0c6f6b1ffc8932dcd685bbca9cd"
+Content-Type: application/xml;charset=UTF-8
+Content-Length: 276
+Date: Thu, 04 Mar 2010 02:15:26 GMT
+
+XML-Payload:
+<api-base-error xmlns="http://www.ebayclassifiedsgroup.com/schema/types" http-status-code="501">
+  <api-errors>
+    <api-error>
+      <message>not implemented yet...</message>
+    </api-error>
+  </api-errors>
+  <api-field-errors/>
+</api-base-error>
+</textarea>
+
+<hr/>
+<script type="text/javascript">
+
+    // all textareas with class 'xml' should be formatted nicely
+    textareas = $('textarea.xml');
+
+    for (i = 0; i < textareas.length; i++) {
+
+        var lines = textareas[i].value.split("\n").length;
+        // we dynamically calculate the textbox area height to avoid uneccessary frontend configuration 
+        var textboxHeight = lines * 18 + "px";
+
+        // todo: we are assigning all textareas the same editor variable, check whether this has bad side-effects
+        var editor = CodeMirror.fromTextArea(textareas[i], {
+            height: textboxHeight,
+            width: "1000px",
+            parserfile: "parsexml.js",
+            stylesheet: "../css/xmlcolors.css",
+            path: "../js/",
+            continuousScanning: 500,
+            lineNumbers: true
+        });
+    }
+
+    
+
+    //adding <br/> to linebreaks in code section, so editing is easier
+    codes = $('p.code');
+    for (i = 0; i <codes.length; i++){
+        $(codes[i]).html($(codes[i]).text().replace(/\n/mg,'<br/>'));
+    }
+
+</script>
+
+
+</body>
+</html>

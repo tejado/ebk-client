@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema version="1.1"
+        targetNamespace="http://www.ebayclassifiedsgroup.com/schema/ad/v1"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:types="http://www.ebayclassifiedsgroup.com/schema/types/v1"
+        xmlns:cat="http://www.ebayclassifiedsgroup.com/schema/category/v1"
+        xmlns:loc="http://www.ebayclassifiedsgroup.com/schema/location/v1"
+        xmlns:attr="http://www.ebayclassifiedsgroup.com/schema/attribute/v1"
+        xmlns:ad="http://www.ebayclassifiedsgroup.com/schema/ad/v1"
+        xmlns:pics="http://www.ebayclassifiedsgroup.com/schema/picture/v1"
+        elementFormDefault="qualified">
+
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace"/>
+    <xs:import namespace="http://www.ebayclassifiedsgroup.com/schema/types/v1" schemaLocation="types-1.0.xsd"/>
+    <xs:import namespace="http://www.ebayclassifiedsgroup.com/schema/category/v1" schemaLocation="category-1.0.xsd"/>
+    <xs:import namespace="http://www.ebayclassifiedsgroup.com/schema/location/v1" schemaLocation="location-1.0.xsd"/>
+    <xs:import namespace="http://www.ebayclassifiedsgroup.com/schema/attribute/v1" schemaLocation="attribute-1.0.xsd"/>
+    <xs:import namespace="http://www.ebayclassifiedsgroup.com/schema/picture/v1" schemaLocation="picture-1.0.xsd"/>
+
+    <xs:annotation>
+        <xs:documentation>eBay Classifieds Group Common API Ad Schema Version 1.1</xs:documentation>
+    </xs:annotation>
+    
+    <!--  See: http://www.xml.com/pub/a/2002/07/03/schema_design.html -->
+    <!--  See: http://www.xml.com/pub/a/2002/07/03/schema_design.html?page=2 -->
+    
+	<xs:redefine schemaLocation="ad-1.0.xsd">
+	
+		<xs:complexType name="Ad">
+			<xs:complexContent>
+				<xs:extension base="ad:Ad">
+					<xs:sequence>
+						<xs:element name="phone" type="types:StringType" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>telephone number</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+
+	</xs:redefine> 
+
+</xs:schema>
